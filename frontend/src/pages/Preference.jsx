@@ -10,18 +10,46 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
     weight: "",
     day: "",
     time: "",
-    distance: ""
+    distance: "",
+    pickupCoords: { lat: null, lng: null },
+    destinationCoords: { lat: null, lng: null }
   });
   const [errors, setErrors] = useState({});
 
   function handleChange(e) {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-    // Clear error when user types
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
   }
+
+  const handleShareLocation = (field) => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locationString = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
+
+        setForm(prev => ({
+          ...prev,
+          [field]: locationString,
+          [`${field === 'from' ? 'pickupCoords' : 'destinationCoords'}`]: { lat: latitude, lng: longitude }
+        }));
+
+        if (errors[field]) {
+          setErrors(prev => ({ ...prev, [field]: "" }));
+        }
+      },
+      (error) => {
+        alert("Unable to retrieve your location");
+      }
+    );
+  };
 
   function validate() {
     const newErrors = {};
@@ -78,7 +106,16 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Location</label>
+                <div className="flex justify-between items-end mb-1">
+                  <label className="block text-sm font-medium text-gray-700">Pickup Location</label>
+                  <button
+                    type="button"
+                    onClick={() => handleShareLocation('from')}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Share Location
+                  </button>
+                </div>
                 <input
                   name="from"
                   value={form.from}
@@ -90,7 +127,16 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
                 {errors.from && <p className="text-red-500 text-xs mt-1">{errors.from}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                <div className="flex justify-between items-end mb-1">
+                  <label className="block text-sm font-medium text-gray-700">Destination</label>
+                  <button
+                    type="button"
+                    onClick={() => handleShareLocation('to')}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Share Location
+                  </button>
+                </div>
                 <input
                   name="to"
                   value={form.to}

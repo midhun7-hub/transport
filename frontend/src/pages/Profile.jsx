@@ -1,8 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
+import useCloudinaryWidget from "../hooks/useCloudinaryWidget";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 function Profile({ onNavigate, user, onLogout }) {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const checkAuth = () => ({
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+
+    const handleUploadSuccess = async (url) => {
+        setIsUploading(true);
+        try {
+            const res = await axios.put('http://localhost:5000/api/auth/profile', { ...user, profileImage: url }, checkAuth());
+            toast.success("Profile picture updated!");
+            // This is a naive update, in reality you'd want a global context or to fetch user again
+            if (res.data.user) {
+                localStorage.setItem("user", JSON.stringify(res.data.user));
+                // We're refreshing to force a global state update since App.jsx manages user
+                window.location.reload();
+            }
+        } catch (err) {
+            toast.error("Failed to update profile picture");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const openWidget = useCloudinaryWidget(handleUploadSuccess);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
             <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
@@ -17,10 +46,21 @@ function Profile({ onNavigate, user, onLogout }) {
 
                 <div className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden">
                     {/* Profile Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center">
-                        <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 shadow-lg">
-                            {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center relative">
+                        <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 shadow-lg overflow-hidden group">
+                            {user?.profileImage ? (
+                                <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                user?.name ? user.name.charAt(0).toUpperCase() : "U"
+                            )}
                         </div>
+                        <button
+                            onClick={openWidget}
+                            disabled={isUploading}
+                            className="mt-4 px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm font-medium rounded-full backdrop-blur-sm transition-colors"
+                        >
+                            {isUploading ? "Updating..." : "Change Picture"}
+                        </button>
                         <h2 className="mt-4 text-2xl font-bold text-white">
                             {user?.name || "User"}
                         </h2>

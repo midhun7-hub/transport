@@ -1,29 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
-
-const vehicles = [
-  { id: 1, name: "Tata ACE", rent: 20, capacity: 1000,
-    img: "https://cdn.pixabay.com/photo/2016/02/19/11/20/truck-1209471_1280.jpg"
-  },
-  { id: 2, name: "Mahindra pickup", rent: 22, capacity: 2000,
-    img: "https://cdn.pixabay.com/photo/2018/03/06/13/50/van-3207857_1280.jpg"
-  },
-  { id: 3, name: "Eicher-4wheel", rent: 25, capacity: 3000,
-    img: "https://cdn.pixabay.com/photo/2017/07/05/12/06/pickup-2478152_1280.jpg"
-  },
-  { id: 4, name: "Eicher-6wheel", rent: 30, capacity: 8000,
-    img: "https://cdn.pixabay.com/photo/2015/03/26/09/54/truck-690713_1280.jpg"
-  },
-  { id: 5, name: "Eicher-10wheel", rent: 35, capacity: 12000,
-    img: "https://cdn.pixabay.com/photo/2017/02/27/15/03/truck-2108027_1280.jpg"
-  }
-];
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
+  const [vehicles, setVehicles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchVehicles = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/vehicles");
+      setVehicles(res.data.filter(v => v.availability));
+    } catch (error) {
+      toast.error("Failed to load vehicles");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
   const weight = parseInt(preference.weight) || 0;
   const distance = parseInt(preference.distance) || 0;
-  const filtered = vehicles.filter(v => v.capacity >= weight);
+  const filtered = vehicles.filter(v => parseInt(v.capacity) >= weight);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
@@ -71,7 +73,9 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center p-12"><p className="text-gray-500">Loading available vehicles...</p></div>
+        ) : filtered.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 p-12 text-center">
             <div className="text-6xl mb-4">😔</div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">No Vehicles Available</h2>
@@ -89,14 +93,14 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {filtered.map(v => {
-              const estimatedCost = v.rent * distance;
+              const estimatedCost = v.pricePerKm * distance;
 
               return (
-                <div key={v.id} className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden hover:shadow-xl transition-shadow">
+                <div key={v._id} className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden hover:shadow-xl transition-shadow">
                   {/* Image */}
                   <div className="relative h-44 bg-gray-100 flex items-center justify-center">
                     <img
-                      src={v.img}
+                      src={v.image || 'https://via.placeholder.com/300x200'}
                       alt={v.name}
                       className="h-full object-contain"
                     />
@@ -114,7 +118,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">Rate</p>
-                        <p className="font-bold text-green-600">₹{v.rent}/km</p>
+                        <p className="font-bold text-green-600">₹{v.pricePerKm}/km</p>
                       </div>
                     </div>
 
@@ -123,7 +127,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
                         <span className="text-gray-600">Estimated Total</span>
                         <span className="text-2xl font-bold text-blue-600">₹{estimatedCost}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{distance} km × ₹{v.rent}/km</p>
+                      <p className="text-xs text-gray-500 mt-1">{distance} km × ₹{v.pricePerKm}/km</p>
                     </div>
 
                     <button

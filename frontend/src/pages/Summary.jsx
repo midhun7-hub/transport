@@ -4,7 +4,7 @@ import Footer from "../Components/Footer";
 
 function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLogout }) {
   const distance = parseInt(preference.distance) || 0;
-  const total = vehicle.rent * distance;
+  const total = vehicle.pricePerKm * distance;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
@@ -36,14 +36,14 @@ function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLo
             </h2>
             <div className="flex items-center gap-4">
               <img
-                src={vehicle.img || "https://images.pexels.com/photos/2424925/pexels-photo-2424925.jpeg"}
+                src={vehicle.image || "https://images.pexels.com/photos/2424925/pexels-photo-2424925.jpeg"}
                 alt={vehicle.name}
                 className="w-24 h-24 rounded-xl object-cover"
               />
               <div>
                 <p className="font-bold text-xl text-gray-900">{vehicle.name}</p>
                 <p className="text-gray-500">Capacity: {vehicle.capacity / 1000} Ton</p>
-                <p className="text-green-600 font-medium">₹{vehicle.rent}/km</p>
+                <p className="text-green-600 font-medium">₹{vehicle.pricePerKm}/km</p>
               </div>
             </div>
           </div>
@@ -115,7 +115,7 @@ function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLo
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-blue-100">Base Rate</span>
-                <span>₹{vehicle.rent}/km</span>
+                <span>₹{vehicle.pricePerKm}/km</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-blue-100">Distance</span>

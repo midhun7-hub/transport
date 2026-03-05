@@ -24,9 +24,18 @@ const auth = (req, res, next) => {
     }
 };
 
+const adminAuth = (req, res, next) => {
+    auth(req, res, () => {
+        if (req.userRole !== "admin") {
+            return res.status(403).json({ message: "Admin access required" });
+        }
+        next();
+    });
+};
+
 // CREATE BOOKING (Simple version without Stripe - for demo/development)
 router.post("/book", auth, async (req, res) => {
-    const { from, to, weight, vehicleType, amount, distance, cargoType, scheduledDate, scheduledTime, paymentId, orderId } = req.body;
+    const { from, to, pickupLocation, pickupCoords, destinationLocation, destinationCoords, weight, vehicleType, amount, distance, cargoType, scheduledDate, scheduledTime, paymentId, orderId } = req.body;
 
     try {
         // Validation
@@ -41,6 +50,10 @@ router.post("/book", auth, async (req, res) => {
             user: req.userId,
             from,
             to,
+            pickupLocation: pickupLocation || "",
+            pickupCoords: pickupCoords || { lat: null, lng: null },
+            destinationLocation: destinationLocation || "",
+            destinationCoords: destinationCoords || { lat: null, lng: null },
             weight: Number(weight),
             vehicleType,
             amount: Number(amount),
@@ -81,10 +94,52 @@ router.post("/book", auth, async (req, res) => {
     }
 });
 
+// GET ALL BOOKINGS (Admin only)
+router.get("/admin/bookings", adminAuth, async (req, res) => {
+    try {
+        const bookings = await Booking.find({})
+            .populate("user", "name email contact")
+            .populate("driver", "name contact vehicle")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json(bookings);
+    } catch (err) {
+        console.error("Get all bookings error:", err);
+        res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+});
+
+// ASSIGN DRIVER TO BOOKING (Admin only)
+router.put("/admin/bookings/:id/assign-driver", adminAuth, async (req, res) => {
+    try {
+        const { driverId } = req.body;
+
+        if (!driverId) {
+            return res.status(400).json({ message: "Driver ID is required" });
+        }
+
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        booking.driver = driverId;
+        booking.status = "In Transit"; // Optional, maybe Admin confirms it first
+        await booking.save();
+
+        res.json({ message: "Driver assigned successfully", booking });
+    } catch (err) {
+        console.error("Assign driver error:", err);
+        res.status(500).json({ message: "Failed to assign driver" });
+    }
+});
+
 // GET ALL USER BOOKINGS
 router.get("/bookings", auth, async (req, res) => {
     try {
         const bookings = await Booking.find({ user: req.userId })
+            .populate("driver", "name contact vehicle")
             .sort({ createdAt: -1 })
             .lean();
 
@@ -101,7 +156,7 @@ router.get("/bookings/:id", auth, async (req, res) => {
         const booking = await Booking.findOne({
             _id: req.params.id,
             user: req.userId,
-        }).lean();
+        }).populate("driver", "name contact vehicle").lean();
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });

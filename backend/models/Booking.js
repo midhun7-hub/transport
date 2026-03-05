@@ -17,6 +17,27 @@ const bookingSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    pickupLocation: {
+        type: String,
+        default: "",
+    },
+    pickupCoords: {
+        lat: { type: Number, default: null },
+        lng: { type: Number, default: null }
+    },
+    destinationLocation: {
+        type: String,
+        default: "",
+    },
+    destinationCoords: {
+        lat: { type: Number, default: null },
+        lng: { type: Number, default: null }
+    },
+    driver: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Driver",
+        default: null,
+    },
     weight: {
         type: Number,
         required: true,

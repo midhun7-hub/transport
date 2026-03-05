@@ -13,7 +13,7 @@ function Payment({ preference, vehicle, onNavigate, onPaymentSuccess, user, onLo
   const [error, setError] = useState("");
 
   const distance = parseInt(preference.distance) || 0;
-  const totalAmount = vehicle.rent * distance;
+  const totalAmount = vehicle.pricePerKm * distance;
 
   function validateForm() {
     if (paymentMethod === "upi") {
@@ -317,7 +317,7 @@ function Payment({ preference, vehicle, onNavigate, onPaymentSuccess, user, onLo
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Rate</span>
-                  <span className="font-medium">₹{vehicle.rent}/km</span>
+                  <span className="font-medium">₹{vehicle.pricePerKm}/km</span>
                 </div>
 
                 <div className="border-t border-gray-100 my-3"></div>

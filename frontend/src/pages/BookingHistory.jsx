@@ -131,6 +131,18 @@ function BookingHistory({ onNavigate, user, onLogout }) {
                                                 </span>
                                             </div>
                                         </div>
+
+                                        {booking.driver && (
+                                            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 text-lg">
+                                                    👨‍✈️
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-800">Assigned Driver</p>
+                                                    <p className="text-sm text-gray-600">{booking.driver.name} • {booking.driver.contact}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="text-right">

@@ -9,6 +9,8 @@ dotenv.config();
 const authRoutes = require("./routes/authRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
+const driverRoutes = require("./routes/driverRoutes");
 
 
 const app = express();
@@ -58,6 +60,8 @@ connectDB();
 app.use("/", authRoutes);
 app.use("/api", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api", vehicleRoutes);
+app.use("/api", driverRoutes);
 
 // 404 Handler
 app.use((req, res) => {

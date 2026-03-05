@@ -5,8 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 // Helper function to generate token
-function generateToken(userId) {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+function generateToken(user) {
+    return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 }
 
 // Helper function to format user response (exclude password)
@@ -18,12 +18,14 @@ function formatUserResponse(user) {
         businessName: user.businessName,
         contact: user.contact,
         address: user.address,
+        role: user.role,
+        profileImage: user.profileImage,
     };
 }
 
 // SIGNUP
 router.post("/signup", async (req, res) => {
-    const { name, businessName, address, contact, email, password } = req.body;
+    const { name, businessName, address, contact, email, password, role, profileImage } = req.body;
 
     try {
         // Validation
@@ -52,12 +54,14 @@ router.post("/signup", async (req, res) => {
             contact: contact || "",
             email: email.toLowerCase(),
             password: hashedPassword,
+            role: role === "admin" ? "admin" : "user",
+            profileImage: profileImage || "",
         });
 
         await newUser.save();
 
         // Generate token so user is automatically logged in after signup
-        const token = generateToken(newUser._id);
+        const token = generateToken(newUser);
 
         console.log(`✅ New user registered: ${email}`);
 
@@ -95,7 +99,7 @@ router.post("/login", async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = generateToken(user);
 
         console.log(`✅ User logged in: ${email}`);
 
@@ -146,11 +150,11 @@ router.put("/profile", async (req, res) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const { name, businessName, contact, address } = req.body;
+        const { name, businessName, contact, address, profileImage } = req.body;
 
         const user = await User.findByIdAndUpdate(
             decoded.id,
-            { name, businessName, contact, address },
+            { name, businessName, contact, address, profileImage },
             { new: true }
         );
 

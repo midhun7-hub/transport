@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Toaster, toast } from "react-hot-toast";
 
 import LoginSignUp from "./pages/LoginSignUp";
 import Home from "./pages/Home";
@@ -11,15 +13,55 @@ import Payment from "./pages/Payment";
 import Confirmation from "./pages/Confirmation";
 import BookingHistory from "./pages/BookingHistory";
 import Profile from "./pages/Profile";
+import AdminLayout from "./Components/AdminLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import ManageVehicles from "./pages/ManageVehicles";
+import ManageDrivers from "./pages/ManageDrivers";
+import PendingBookings from "./pages/PendingBookings";
+import NavigationBar from "./Components/NavigationBar";
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const token = localStorage.getItem("token");
+  const userStr = localStorage.getItem("user");
+  const location = useLocation();
+
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  try {
+    const user = JSON.parse(userStr);
+    if (allowedRoles && !allowedRoles.includes(user?.role)) {
+      // Redirect to home if user is not authorized for this role
+      return <Navigate to="/" replace />;
+    }
+  } catch (error) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+// Layout component to include NavigationBar for non-admin pages
+const MainLayout = ({ children, user, handleLogout }) => {
+  return (
+    <>
+      <NavigationBar onNavigate={() => { }} user={user} onLogout={handleLogout} />
+      <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
+        {children}
+      </div>
+    </>
+  );
+};
 
 function App() {
-  const [page, setPage] = useState("login");
   const [user, setUser] = useState(null);
-  const [preference, setPreference] = useState({});
-  const [vehicle, setVehicle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing auth on mount
+  // Flow State
+  const [preference, setPreference] = useState({});
+  const [vehicle, setVehicle] = useState(null);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
@@ -27,9 +69,7 @@ function App() {
     if (token && savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-        setPage("home");
       } catch (e) {
-        // Invalid saved data, clear it
         localStorage.removeItem("token");
         localStorage.removeItem("user");
       }
@@ -37,15 +77,7 @@ function App() {
     setIsLoading(false);
   }, []);
 
-  function navigate(to) {
-    setPage(to);
-    if (to === "home") {
-      setPreference({});
-      setVehicle(null);
-    }
-  }
-
-  function handleLogin(data) {
+  const handleLogin = (data) => {
     if (data.user) {
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -53,19 +85,17 @@ function App() {
     if (data.token) {
       localStorage.setItem("token", data.token);
     }
-    setPage("home");
-  }
+  };
 
-  function handleLogout() {
+  const handleLogout = () => {
     setUser(null);
     setPreference({});
     setVehicle(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setPage("login");
-  }
+    // Routing redirect is managed in components
+  };
 
-  // Show loading while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -78,75 +108,37 @@ function App() {
   }
 
   return (
-    <>
-      {page === "login" && (
-        <LoginSignUp onLogin={handleLogin} />
-      )}
+    <BrowserRouter>
+      <Toaster position="top-center" />
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" /> : <LoginSignUp onLogin={handleLogin} />} />
 
-      {page === "home" && (
-        <Home onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
-      {page === "about" && (
-        <About onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
-      {page === "contact" && (
-        <Contact onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
-      {page === "history" && (
-        <BookingHistory onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
-      {page === "profile" && (
-        <Profile onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
+        {/* User Routes (Protected layout logic handles navbar inside) */}
+        <Route path="/" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Home user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/about" element={<ProtectedRoute allowedRoles={["user", "admin"]}><About user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/contact" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Contact user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Profile user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute allowedRoles={["user", "admin"]}><BookingHistory user={user} onLogout={handleLogout} /></ProtectedRoute>} />
 
-      {page === "preference" && (
-        <Preference
-          onNavigate={navigate}
-          onSetPreferences={setPreference}
-          user={user}
-          onLogout={handleLogout}
-        />
-      )}
+        {/* Booking Flow */}
+        <Route path="/preference" element={<ProtectedRoute allowedRoles={["user"]}><Preference onSetPreferences={setPreference} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/booking" element={<ProtectedRoute allowedRoles={["user"]}><Booking preference={preference} onSelectVehicle={setVehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/summary" element={<ProtectedRoute allowedRoles={["user"]}><Summary preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/payment" element={<ProtectedRoute allowedRoles={["user"]}><Payment preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/confirmation" element={<ProtectedRoute allowedRoles={["user"]}><Confirmation user={user} onLogout={handleLogout} /></ProtectedRoute>} />
 
-      {page === "booking" && (
-        <Booking
-          preference={preference}
-          onNavigate={navigate}
-          onSelectVehicle={(v) => {
-            setVehicle(v);
-            setPage("summary");
-          }}
-          user={user}
-          onLogout={handleLogout}
-        />
-      )}
+        {/* Admin Routes */}
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminLayout user={user} onLogout={handleLogout} /></ProtectedRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="vehicles" element={<ManageVehicles />} />
+          <Route path="drivers" element={<ManageDrivers />} />
+          <Route path="bookings" element={<PendingBookings />} />
+        </Route>
 
-      {page === "summary" && vehicle && (
-        <Summary
-          preference={preference}
-          vehicle={vehicle}
-          user={user}
-          onNavigate={navigate}
-          onConfirmBooking={() => setPage("payment")}
-          onLogout={handleLogout}
-        />
-      )}
-
-      {page === "payment" && vehicle && (
-        <Payment
-          preference={preference}
-          vehicle={vehicle}
-          onNavigate={navigate}
-          onPaymentSuccess={() => setPage("confirmation")}
-          user={user}
-          onLogout={handleLogout}
-        />
-      )}
-
-      {page === "confirmation" && (
-        <Confirmation onNavigate={navigate} user={user} onLogout={handleLogout} />
-      )}
-    </>
+        {/* Wildcard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
