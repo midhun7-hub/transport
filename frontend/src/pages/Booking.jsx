@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
+function Booking({ preference, onSelectVehicle, user, onLogout }) {
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
   const fetchVehicles = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/vehicles");
+      const res = await axios.get("http://localhost:5001/api/vehicles");
       setVehicles(res.data.filter(v => v.availability));
     } catch (error) {
       toast.error("Failed to load vehicles");
@@ -19,22 +25,22 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
     }
   };
 
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
-  const weight = parseInt(preference.weight) || 0;
-  const distance = parseInt(preference.distance) || 0;
+  const handleSelect = (vehicle) => {
+    onSelectVehicle(vehicle);
+    navigate("/summary");
+  };
+  const weight = parseInt(preference?.weight) || 0;
+  const distance = parseInt(preference?.distance) || 0;
   const filtered = vehicles.filter(v => parseInt(v.capacity) >= weight);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 max-w-5xl mx-auto py-12 px-6 w-full">
         <div className="mb-8">
           <button
-            onClick={() => onNavigate("preference")}
+            onClick={() => navigate("/preference")}
             className="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-4 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +53,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
             Available Vehicles
           </h1>
           <p className="text-gray-600">
-            Showing vehicles suitable for {weight} kg cargo • {preference.from} → {preference.to}
+            Showing vehicles suitable for {weight} kg cargo • {preference?.from || 'N/A'} → {preference?.to || 'N/A'}
           </p>
         </div>
 
@@ -56,11 +62,11 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
           <div className="grid sm:grid-cols-4 gap-4">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">From</p>
-              <p className="font-bold text-gray-800">{preference.from}</p>
+              <p className="font-bold text-gray-800">{preference?.from || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">To</p>
-              <p className="font-bold text-gray-800">{preference.to}</p>
+              <p className="font-bold text-gray-800">{preference?.to || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Distance</p>
@@ -84,7 +90,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
               Please try with a smaller weight or contact us for custom solutions.
             </p>
             <button
-              onClick={() => onNavigate("preference")}
+              onClick={() => navigate("/preference")}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold"
             >
               Modify Preferences
@@ -131,7 +137,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
                     </div>
 
                     <button
-                      onClick={() => onSelectVehicle(v)}
+                      onClick={() => handleSelect(v)}
                       className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
                     >
                       Select Vehicle
@@ -144,7 +150,7 @@ function Booking({ preference, onNavigate, onSelectVehicle, user, onLogout }) {
         )}
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

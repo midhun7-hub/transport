@@ -1,11 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 
-function Confirmation({ onNavigate, user, onLogout }) {
+function Confirmation({ user, onLogout }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 flex justify-center items-center py-20 px-6">
         <div className="bg-white rounded-3xl shadow-2xl shadow-blue-500/10 p-8 md:p-12 text-center max-w-lg w-full">
@@ -49,13 +51,13 @@ function Confirmation({ onNavigate, user, onLogout }) {
           {/* Actions */}
           <div className="space-y-3">
             <button
-              onClick={() => onNavigate("history")}
+              onClick={() => navigate("/history")}
               className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
             >
               View My Bookings
             </button>
             <button
-              onClick={() => onNavigate("home")}
+              onClick={() => navigate("/")}
               className="w-full py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
             >
               Back to Home
@@ -70,7 +72,7 @@ function Confirmation({ onNavigate, user, onLogout }) {
         </div>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

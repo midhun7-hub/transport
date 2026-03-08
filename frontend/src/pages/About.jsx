@@ -1,13 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import { vehicleData } from "../data/vehicles";
 import VehicleCard from "../Components/VehicleCard";
 
-function About({ onNavigate, user, onLogout }) {
+function About({ user, onLogout }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 max-w-7xl mx-auto py-12 px-6 w-full">
         <div className="text-center mb-12">
@@ -21,7 +23,7 @@ function About({ onNavigate, user, onLogout }) {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {vehicleData.map((vehicle, i) => (
-            <VehicleCard key={i} vehicle={vehicle} onBook={() => onNavigate("preference")} />
+            <VehicleCard key={i} vehicle={vehicle} onBook={() => navigate("/preference")} />
           ))}
         </div>
 
@@ -51,7 +53,7 @@ function About({ onNavigate, user, onLogout }) {
         </section>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

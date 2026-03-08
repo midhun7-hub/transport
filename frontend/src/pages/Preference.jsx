@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
+import { toast } from "react-hot-toast";
+import { MapPin, Loader2 } from "lucide-react";
 
-function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
+function Preference({ onSetPreferences, user, onLogout }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     from: "",
     to: "",
@@ -24,11 +28,15 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
     }
   }
 
+  const [isLocating, setIsLocating] = useState({ from: false, to: false });
+
   const handleShareLocation = (field) => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
       return;
     }
+
+    setIsLocating(prev => ({ ...prev, [field]: true }));
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -44,10 +52,26 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
         if (errors[field]) {
           setErrors(prev => ({ ...prev, [field]: "" }));
         }
+        setIsLocating(prev => ({ ...prev, [field]: false }));
+        toast.success("Location updated!");
       },
       (error) => {
-        alert("Unable to retrieve your location");
-      }
+        setIsLocating(prev => ({ ...prev, [field]: false }));
+        let errorMsg = "Unable to retrieve your location";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMsg = "Location access denied. Please enable location permissions.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMsg = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMsg = "The request to get user location timed out.";
+            break;
+        }
+        alert(errorMsg);
+      },
+      { timeout: 10000 }
     );
   };
 
@@ -69,7 +93,7 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
     e.preventDefault();
     if (validate()) {
       onSetPreferences(form);
-      onNavigate("booking");
+      navigate("/booking");
     }
   }
 
@@ -87,7 +111,7 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 max-w-2xl mx-auto py-12 px-6 w-full">
         <div className="text-center mb-8">
@@ -110,10 +134,12 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
                   <label className="block text-sm font-medium text-gray-700">Pickup Location</label>
                   <button
                     type="button"
+                    disabled={isLocating.from}
                     onClick={() => handleShareLocation('from')}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md transition-colors disabled:opacity-50"
                   >
-                    Share Location
+                    {isLocating.from ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
+                    {isLocating.from ? 'Locating...' : 'Share Location'}
                   </button>
                 </div>
                 <input
@@ -131,10 +157,12 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
                   <label className="block text-sm font-medium text-gray-700">Destination</label>
                   <button
                     type="button"
+                    disabled={isLocating.to}
                     onClick={() => handleShareLocation('to')}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md transition-colors disabled:opacity-50"
                   >
-                    Share Location
+                    {isLocating.to ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
+                    {isLocating.to ? 'Locating...' : 'Share Location'}
                   </button>
                 </div>
                 <input
@@ -251,7 +279,7 @@ function Preference({ onNavigate, onSetPreferences, user, onLogout }) {
         </form>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

@@ -18,7 +18,7 @@ const ManageVehicles = () => {
 
     const fetchVehicles = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/vehicles', checkAuth());
+            const res = await axios.get('http://localhost:5001/api/vehicles', checkAuth());
             setVehicles(res.data);
         } catch (error) {
             toast.error("Failed to load vehicles");
@@ -44,10 +44,10 @@ const ManageVehicles = () => {
         e.preventDefault();
         try {
             if (editId) {
-                await axios.put(`http://localhost:5000/api/vehicles/${editId}`, formData, checkAuth());
+                await axios.put(`http://localhost:5001/api/vehicles/${editId}`, formData, checkAuth());
                 toast.success("Vehicle updated successfully");
             } else {
-                await axios.post('http://localhost:5000/api/vehicles', formData, checkAuth());
+                await axios.post('http://localhost:5001/api/vehicles', formData, checkAuth());
                 toast.success("Vehicle added successfully");
             }
             fetchVehicles();
@@ -60,7 +60,7 @@ const ManageVehicles = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this vehicle?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/vehicles/${id}`, checkAuth());
+                await axios.delete(`http://localhost:5001/api/vehicles/${id}`, checkAuth());
                 toast.success("Vehicle deleted");
                 fetchVehicles();
             } catch (error) {
@@ -97,7 +97,7 @@ const ManageVehicles = () => {
                         {vehicles.map((v) => (
                             <tr key={v._id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
+                                    <div className={`flex items-center ${!v.availability ? 'opacity-50' : ''}`}>
                                         <div className="h-10 w-10 flex-shrink-0">
                                             <img className="h-10 w-10 rounded-full object-cover" src={v.image || 'https://via.placeholder.com/40'} alt="" />
                                         </div>
@@ -107,15 +107,15 @@ const ManageVehicles = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">{v.type}</div>
-                                    <div className="text-sm text-gray-500">{v.capacity} kg</div>
+                                    <div className={`text-sm text-gray-900 ${!v.availability ? 'opacity-50' : ''}`}>{v.type}</div>
+                                    <div className={`text-sm text-gray-500 ${!v.availability ? 'opacity-50' : ''}`}>{v.capacity} kg</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${!v.availability ? 'opacity-50' : ''}`}>
                                     ₹{v.pricePerKm}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${v.availability ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {v.availability ? 'Available' : 'Unavailable'}
+                                        {v.availability ? 'Available' : 'On Ride'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -134,39 +134,87 @@ const ManageVehicles = () => {
 
             {/* Modal */}
             {isModalsOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-bold mb-4">{editId ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">{editId ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
-                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                                <label className="block text-sm font-medium text-gray-700">Vehicle Name</label>
+                                <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Tata Ace" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Type</label>
-                                    <input required type="text" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                                    <input required type="text" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Mini Truck" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Capacity (kg)</label>
-                                    <input required type="number" value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                                    <input required type="number" value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Price Per Km (₹)</label>
-                                <input required type="number" value={formData.pricePerKm} onChange={e => setFormData({ ...formData, pricePerKm: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                                <input required type="number" value={formData.pricePerKm} onChange={e => setFormData({ ...formData, pricePerKm: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Image URL</label>
-                                <input type="text" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="https://..." />
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Photo</label>
+                                <div
+                                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors"
+                                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-500'); }}
+                                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-500'); }}
+                                    onDrop={async (e) => {
+                                        e.preventDefault();
+                                        e.currentTarget.classList.remove('border-blue-500');
+                                        const file = e.dataTransfer.files[0];
+                                        if (file) {
+                                            // Simulated upload for now - in real app, use Cloudinary or direct upload
+                                            // For this demo, we'll store a mock URL if no real backend upload is ready
+                                            // But let's assume useCloudinaryWidget can be adapted or we just use simple base64/placeholder
+                                            const reader = new FileReader();
+                                            reader.onload = (readerEvent) => {
+                                                setFormData({ ...formData, image: readerEvent.target.result });
+                                                toast.success("Photo selected");
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    onClick={() => document.getElementById('vehicle-image-input').click()}
+                                >
+                                    {formData.image ? (
+                                        <img src={formData.image} alt="Preview" className="h-32 w-full object-cover rounded-md mx-auto" />
+                                    ) : (
+                                        <div className="py-4">
+                                            <p className="text-gray-500 text-sm">Drag & drop photo here or click to upload</p>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        id="vehicle-image-input"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (readerEvent) => {
+                                                    setFormData({ ...formData, image: readerEvent.target.result });
+                                                    toast.success("Photo selected");
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </div>
                             </div>
+
                             <div className="flex items-center">
                                 <input type="checkbox" checked={formData.availability} onChange={e => setFormData({ ...formData, availability: e.target.checked })} className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                                 <label className="ml-2 block text-sm text-gray-900">Available for booking</label>
                             </div>
                             <div className="flex justify-end space-x-3 mt-6">
                                 <button type="button" onClick={() => setIsModalsOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
-                                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">Save</button>
+                                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">Save Vehicle</button>
                             </div>
                         </form>
                     </div>

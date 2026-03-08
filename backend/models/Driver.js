@@ -22,6 +22,10 @@ const driverSchema = new mongoose.Schema({
         ref: "Vehicle",
         default: null, // Assigned later or specific to this driver
     },
+    image: {
+        type: String, // Cloudinary URL
+        default: "",
+    },
     status: {
         type: String,
         enum: ["Available", "On Trip", "Inactive"],

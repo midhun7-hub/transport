@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import { API_URL } from "../config";
 
-function BookingHistory({ onNavigate, user, onLogout }) {
+function BookingHistory({ user, onLogout }) {
+    const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -40,6 +42,10 @@ function BookingHistory({ onNavigate, user, onLogout }) {
                 return "bg-green-100 text-green-700 border-green-200";
             case "pending":
                 return "bg-yellow-100 text-yellow-700 border-yellow-200";
+            case "in transit":
+                return "bg-blue-100 text-blue-700 border-blue-200";
+            case "completed":
+                return "bg-emerald-100 text-emerald-700 border-emerald-200";
             case "cancelled":
                 return "bg-red-100 text-red-700 border-red-200";
             default:
@@ -49,7 +55,7 @@ function BookingHistory({ onNavigate, user, onLogout }) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-            <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+            <NavigationBar user={user} onLogout={onLogout} />
 
             <main className="max-w-4xl mx-auto py-12 px-6">
                 <div className="mb-8">
@@ -82,7 +88,7 @@ function BookingHistory({ onNavigate, user, onLogout }) {
                         <h2 className="text-xl font-bold text-gray-800 mb-2">No Bookings Yet</h2>
                         <p className="text-gray-600 mb-6">You haven't made any bookings. Start by renting a vehicle!</p>
                         <button
-                            onClick={() => onNavigate("preference")}
+                            onClick={() => navigate("/preference")}
                             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
                         >
                             Rent Vehicle
@@ -93,7 +99,8 @@ function BookingHistory({ onNavigate, user, onLogout }) {
                         {bookings.map((booking, index) => (
                             <div
                                 key={booking._id || index}
-                                className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 p-6 hover:shadow-xl transition-shadow"
+                                onClick={() => navigate(`/history/${booking._id}`)}
+                                className="bg-white rounded-2xl shadow-lg shadow-blue-500/5 p-6 hover:shadow-xl transition-shadow cursor-pointer hover:ring-2 hover:ring-blue-200"
                             >
                                 <div className="flex flex-wrap items-start justify-between gap-4">
                                     <div className="flex-1">
@@ -156,7 +163,7 @@ function BookingHistory({ onNavigate, user, onLogout }) {
                 )}
             </main>
 
-            <Footer onNavigate={onNavigate} />
+            <Footer />
         </div>
     );
 }

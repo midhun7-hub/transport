@@ -1,11 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 
-function Contact({ onNavigate, user, onLogout }) {
+function Contact({ user, onLogout }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 max-w-6xl mx-auto py-12 px-6 w-full">
         <div className="text-center mb-12">
@@ -134,7 +136,7 @@ function Contact({ onNavigate, user, onLogout }) {
         </div>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

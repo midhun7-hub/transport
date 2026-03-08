@@ -1,11 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import useCloudinaryWidget from "../hooks/useCloudinaryWidget";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-function Profile({ onNavigate, user, onLogout }) {
+function Profile({ user, onLogout }) {
+    const navigate = useNavigate();
     const [isUploading, setIsUploading] = useState(false);
 
     const checkAuth = () => ({
@@ -15,7 +17,7 @@ function Profile({ onNavigate, user, onLogout }) {
     const handleUploadSuccess = async (url) => {
         setIsUploading(true);
         try {
-            const res = await axios.put('http://localhost:5000/api/auth/profile', { ...user, profileImage: url }, checkAuth());
+            const res = await axios.put('http://localhost:5001/api/auth/profile', { ...user, profileImage: url }, checkAuth());
             toast.success("Profile picture updated!");
             // This is a naive update, in reality you'd want a global context or to fetch user again
             if (res.data.user) {
@@ -34,7 +36,7 @@ function Profile({ onNavigate, user, onLogout }) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-            <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+            <NavigationBar user={user} onLogout={onLogout} />
 
             <main className="max-w-2xl mx-auto py-12 px-6">
                 <div className="mb-8">
@@ -105,14 +107,14 @@ function Profile({ onNavigate, user, onLogout }) {
                             <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <button
-                                    onClick={() => onNavigate("preference")}
+                                    onClick={() => navigate("/preference")}
                                     className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
                                 >
                                     <span>🚚</span>
                                     Book a Vehicle
                                 </button>
                                 <button
-                                    onClick={() => onNavigate("history")}
+                                    onClick={() => navigate("/history")}
                                     className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all"
                                 >
                                     <span>📋</span>
@@ -134,7 +136,7 @@ function Profile({ onNavigate, user, onLogout }) {
                 </div>
             </main>
 
-            <Footer onNavigate={onNavigate} />
+            <Footer />
         </div>
     );
 }

@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 
-function Home({ onNavigate, user, onLogout }) {
+function Home({ user, onLogout }) {
+  const navigate = useNavigate();
+
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
   const features = [
     { icon: "🚚", title: "Wide Vehicle Range", desc: "From mini trucks to container trucks" },
     { icon: "⚡", title: "Instant Booking", desc: "Book your cargo vehicle in seconds" },
@@ -12,7 +18,7 @@ function Home({ onNavigate, user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       {/* Hero Section */}
       <main className="flex-1">
@@ -26,7 +32,7 @@ function Home({ onNavigate, user, onLogout }) {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
             <div className="text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-                
+
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -43,7 +49,7 @@ function Home({ onNavigate, user, onLogout }) {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => onNavigate("preference")}
+                  onClick={() => navigate("/preference")}
                   className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
                 >
                   <span className="flex items-center justify-center gap-2">
@@ -54,7 +60,7 @@ function Home({ onNavigate, user, onLogout }) {
                   </span>
                 </button>
                 <button
-                  onClick={() => onNavigate("about")}
+                  onClick={() => navigate("/about")}
                   className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-lg hover:border-blue-300 hover:text-blue-600 transition-all"
                 >
                   View Vehicles
@@ -121,7 +127,7 @@ function Home({ onNavigate, user, onLogout }) {
                   Get started today and experience hassle-free transportation
                 </p>
                 <button
-                  onClick={() => onNavigate("preference")}
+                  onClick={() => navigate("/preference")}
                   className="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors"
                 >
                   Get Started Now
@@ -132,7 +138,7 @@ function Home({ onNavigate, user, onLogout }) {
         </section>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

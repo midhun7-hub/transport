@@ -1,18 +1,20 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function NavigationBar({ onNavigate, user, onLogout }) {
+function NavigationBar({ user, onLogout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
-    { label: "Home", page: "home" },
-    { label: "Vehicles", page: "about" },
-    { label: "Contact", page: "contact" },
+    { label: "Home", path: "/" },
+    { label: "Vehicles", path: "/about" },
+    { label: "Contact", path: "/contact" },
   ];
 
   const userLinks = [
-    { label: "Book Now", page: "preference" },
-    { label: "My Bookings", page: "history" },
-    { label: "Profile", page: "profile" },
+    { label: "Book Now", path: "/preference" },
+    { label: "My Bookings", path: "/history" },
+    { label: "Profile", path: "/profile" },
   ];
 
   return (
@@ -21,7 +23,7 @@ function NavigationBar({ onNavigate, user, onLogout }) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
           >
             <span className="text-2xl">🚚</span>
@@ -34,8 +36,8 @@ function NavigationBar({ onNavigate, user, onLogout }) {
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <button
-                key={link.page}
-                onClick={() => onNavigate(link.page)}
+                key={link.path}
+                onClick={() => navigate(link.path)}
                 className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-all"
               >
                 {link.label}
@@ -49,13 +51,21 @@ function NavigationBar({ onNavigate, user, onLogout }) {
               <>
                 {userLinks.map((link) => (
                   <button
-                    key={link.page}
-                    onClick={() => onNavigate(link.page)}
+                    key={link.path}
+                    onClick={() => navigate(link.path)}
                     className="px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-all"
                   >
                     {link.label}
                   </button>
                 ))}
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => navigate("/admin")}
+                    className="px-3 py-2 text-sm text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg font-bold transition-all border border-orange-200"
+                  >
+                    Admin Dashboard
+                  </button>
+                )}
                 <div className="h-6 w-px bg-gray-200 mx-2"></div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
@@ -76,7 +86,7 @@ function NavigationBar({ onNavigate, user, onLogout }) {
               </>
             ) : (
               <button
-                onClick={() => onNavigate("login")}
+                onClick={() => navigate("/login")}
                 className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all"
               >
                 Login
@@ -108,9 +118,9 @@ function NavigationBar({ onNavigate, user, onLogout }) {
           <div className="px-4 py-3 space-y-1">
             {navLinks.map((link) => (
               <button
-                key={link.page}
+                key={link.path}
                 onClick={() => {
-                  onNavigate(link.page);
+                  navigate(link.path);
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full text-left px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-all"
@@ -124,9 +134,9 @@ function NavigationBar({ onNavigate, user, onLogout }) {
                 <div className="h-px bg-gray-200 my-2"></div>
                 {userLinks.map((link) => (
                   <button
-                    key={link.page}
+                    key={link.path}
                     onClick={() => {
-                      onNavigate(link.page);
+                      navigate(link.path);
                       setIsMobileMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-all"
@@ -163,7 +173,7 @@ function NavigationBar({ onNavigate, user, onLogout }) {
             ) : (
               <button
                 onClick={() => {
-                  onNavigate("login");
+                  navigate("/login");
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium text-center"

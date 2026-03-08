@@ -14,8 +14,8 @@ const PendingBookings = () => {
     const fetchData = async () => {
         try {
             const [bookingsRes, driversRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/admin/bookings', checkAuth()),
-                axios.get('http://localhost:5000/api/drivers', checkAuth())
+                axios.get('http://localhost:5001/api/admin/bookings', checkAuth()),
+                axios.get('http://localhost:5001/api/drivers', checkAuth())
             ]);
             setBookings(bookingsRes.data);
             setDrivers(driversRes.data.filter(d => d.status === 'Available'));
@@ -30,18 +30,20 @@ const PendingBookings = () => {
         fetchData();
     }, []);
 
+    const handleStatusUpdate = async (bookingId, newStatus) => {
+        try {
+            await axios.put(`http://localhost:5001/api/admin/bookings/${bookingId}/status`, { status: newStatus }, checkAuth());
+            toast.success(`Status updated to ${newStatus}`);
+            fetchData();
+        } catch (error) {
+            toast.error("Failed to update status");
+        }
+    };
+
     const handleAssignDriver = async (bookingId, driverId) => {
         if (!driverId) return;
-
         try {
-            await axios.put(`http://localhost:5000/api/admin/bookings/${bookingId}/assign-driver`, { driverId }, checkAuth());
-
-            // Also update driver status to 'On Trip'
-            const driver = drivers.find(d => d._id === driverId);
-            if (driver) {
-                await axios.put(`http://localhost:5000/api/drivers/${driverId}`, { ...driver, status: 'On Trip' }, checkAuth());
-            }
-
+            await axios.put(`http://localhost:5001/api/admin/bookings/${bookingId}/assign-driver`, { driverId }, checkAuth());
             toast.success("Driver assigned successfully");
             fetchData();
         } catch (error) {
@@ -49,64 +51,96 @@ const PendingBookings = () => {
         }
     };
 
-    if (isLoading) return <div className="p-8 text-center">Loading bookings...</div>;
+    if (isLoading) return (
+        <div className="flex items-center justify-center p-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+    );
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Manage Bookings</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Manage Bookings</h1>
+                <button onClick={fetchData} className="text-sm text-blue-600 hover:underline">Refresh List</button>
+            </div>
 
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Info</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route Details</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assign Driver</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status & Driver</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {bookings.map((b) => (
-                            <tr key={b._id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">{b.user?.name || 'Unknown User'}</div>
-                                    <div className="text-sm text-gray-500">{new Date(b.createdAt).toLocaleDateString()}</div>
-                                    <div className="text-xs text-blue-600 mt-1">{b.vehicleType}</div>
+                            <tr key={b._id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4">
+                                    <div className="text-sm font-semibold text-gray-900">{b.user?.name || 'Guest User'}</div>
+                                    <div className="text-xs text-gray-500">{new Date(b.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</div>
+                                    <div className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block mt-1">{b.vehicleType}</div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="text-sm text-gray-900 truncate max-w-xs" title={b.from}>From: {b.from}</div>
-                                    <div className="text-sm text-gray-500 truncate max-w-xs" title={b.to}>To: {b.to}</div>
+                                    <div className="text-sm text-gray-900 flex items-center space-x-1">
+                                        <span className="font-medium">From:</span>
+                                        <span className="truncate max-w-[150px]" title={b.from}>{b.from}</span>
+                                    </div>
+                                    <div className="text-sm text-gray-500 flex items-center space-x-1">
+                                        <span className="font-medium">To:</span>
+                                        <span className="truncate max-w-[150px]" title={b.to}>{b.to}</span>
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">{b.distance} km • {b.weight} kg</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                                     ₹{b.amount}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        ${b.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                            b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
-                                                b.status === 'In Transit' ? 'bg-indigo-100 text-indigo-800' :
-                                                    b.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {b.status}
-                                    </span>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <span className={`px-2 py-1 text-center inline-flex text-xs leading-5 font-semibold rounded-full w-24
+                                            ${b.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+                                                    b.status === 'In Transit' ? 'bg-indigo-100 text-indigo-800' :
+                                                        b.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            {b.status}
+                                        </span>
+                                        {b.driver ? (
+                                            <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded border border-green-100 font-medium">
+                                                Driver: {b.driver.name}
+                                            </div>
+                                        ) : (
+                                            <div className="text-xs text-red-500 italic">No driver assigned</div>
+                                        )}
+                                    </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {b.driver ? (
-                                        <div className="text-green-600 font-medium">
-                                            Assigned: {b.driver.name}
-                                        </div>
-                                    ) : (
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                    <div className="flex flex-col items-end space-y-2">
+                                        {!b.driver && (
+                                            <select
+                                                onChange={(e) => handleAssignDriver(b._id, e.target.value)}
+                                                className="block w-40 border border-gray-300 rounded-md shadow-sm py-1.5 px-2 text-xs focus:ring-blue-500 focus:border-blue-500"
+                                                defaultValue=""
+                                            >
+                                                <option value="" disabled>Assign Driver</option>
+                                                {drivers.map(d => (
+                                                    <option key={d._id} value={d._id}>{d.name} ({d.vehicle?.name || 'NA'})</option>
+                                                ))}
+                                            </select>
+                                        )}
                                         <select
-                                            onChange={(e) => handleAssignDriver(b._id, e.target.value)}
-                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                            defaultValue=""
+                                            value={b.status}
+                                            onChange={(e) => handleStatusUpdate(b._id, e.target.value)}
+                                            className="block w-40 border border-gray-300 rounded-md shadow-sm py-1.5 px-2 text-xs focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="" disabled>Select Driver</option>
-                                            {drivers.map(d => (
-                                                <option key={d._id} value={d._id}>{d.name} ({d.vehicle?.name || 'No Vehicle'})</option>
-                                            ))}
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="In Transit">In Transit</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
                                         </select>
-                                    )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}

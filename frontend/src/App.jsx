@@ -12,6 +12,7 @@ import Summary from "./pages/Summary";
 import Payment from "./pages/Payment";
 import Confirmation from "./pages/Confirmation";
 import BookingHistory from "./pages/BookingHistory";
+import BookingDetail from "./pages/BookingDetail";
 import Profile from "./pages/Profile";
 import AdminLayout from "./Components/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -46,7 +47,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const MainLayout = ({ children, user, handleLogout }) => {
   return (
     <>
-      <NavigationBar onNavigate={() => { }} user={user} onLogout={handleLogout} />
+      <NavigationBar user={user} onLogout={handleLogout} />
       <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
         {children}
       </div>
@@ -114,17 +115,22 @@ function App() {
         <Route path="/login" element={user ? <Navigate to="/" /> : <LoginSignUp onLogin={handleLogin} />} />
 
         {/* User Routes (Protected layout logic handles navbar inside) */}
-        <Route path="/" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Home user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/" element={
+          <ProtectedRoute allowedRoles={["user", "admin"]}>
+            {user?.role === 'admin' ? <Navigate to="/admin" replace /> : <Home user={user} onLogout={handleLogout} />}
+          </ProtectedRoute>
+        } />
         <Route path="/about" element={<ProtectedRoute allowedRoles={["user", "admin"]}><About user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/contact" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Contact user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Profile user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute allowedRoles={["user", "admin"]}><BookingHistory user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/history/:id" element={<ProtectedRoute allowedRoles={["user", "admin"]}><BookingDetail user={user} onLogout={handleLogout} /></ProtectedRoute>} />
 
         {/* Booking Flow */}
         <Route path="/preference" element={<ProtectedRoute allowedRoles={["user"]}><Preference onSetPreferences={setPreference} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/booking" element={<ProtectedRoute allowedRoles={["user"]}><Booking preference={preference} onSelectVehicle={setVehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
-        <Route path="/summary" element={<ProtectedRoute allowedRoles={["user"]}><Summary preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
-        <Route path="/payment" element={<ProtectedRoute allowedRoles={["user"]}><Payment preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/summary" element={<ProtectedRoute allowedRoles={["user"]}><Summary preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} onConfirmBooking={() => { /* navigate handled inside Summary via useNavigate */ }} /></ProtectedRoute>} />
+        <Route path="/payment" element={<ProtectedRoute allowedRoles={["user"]}><Payment preference={preference} vehicle={vehicle} user={user} onLogout={handleLogout} onPaymentSuccess={() => { /* navigate to confirmation */ }} /></ProtectedRoute>} />
         <Route path="/confirmation" element={<ProtectedRoute allowedRoles={["user"]}><Confirmation user={user} onLogout={handleLogout} /></ProtectedRoute>} />
 
         {/* Admin Routes */}

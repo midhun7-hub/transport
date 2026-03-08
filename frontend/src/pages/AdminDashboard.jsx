@@ -33,9 +33,9 @@ const AdminDashboard = () => {
             try {
                 // Fetch all required data to compute stats
                 const [vehiclesRes, driversRes, bookingsRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/vehicles', checkAuth()), // Adjust mapping
-                    axios.get('http://localhost:5000/api/drivers', checkAuth()),
-                    axios.get('http://localhost:5000/api/admin/bookings', checkAuth()),
+                    axios.get('http://localhost:5001/api/vehicles', checkAuth()), // Adjust mapping
+                    axios.get('http://localhost:5001/api/drivers', checkAuth()),
+                    axios.get('http://localhost:5001/api/admin/bookings', checkAuth()),
                 ]);
 
                 const bookings = bookingsRes.data;

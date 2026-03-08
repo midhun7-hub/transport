@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-function Footer({ onNavigate }) {
+function Footer() {
+    const navigate = useNavigate();
     return (
         <footer className="bg-gray-900 text-white mt-auto">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -34,22 +36,22 @@ function Footer({ onNavigate }) {
                         <h3 className="font-bold text-lg mb-4">Quick Links</h3>
                         <ul className="space-y-3">
                             <li>
-                                <button onClick={() => onNavigate("home")} className="text-gray-400 hover:text-white transition-colors">
+                                <button onClick={() => navigate("/")} className="text-gray-400 hover:text-white transition-colors">
                                     Home
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => onNavigate("about")} className="text-gray-400 hover:text-white transition-colors">
+                                <button onClick={() => navigate("/about")} className="text-gray-400 hover:text-white transition-colors">
                                     Our Vehicles
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => onNavigate("preference")} className="text-gray-400 hover:text-white transition-colors">
+                                <button onClick={() => navigate("/preference")} className="text-gray-400 hover:text-white transition-colors">
                                     Book Now
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => onNavigate("contact")} className="text-gray-400 hover:text-white transition-colors">
+                                <button onClick={() => navigate("/contact")} className="text-gray-400 hover:text-white transition-colors">
                                     Contact Us
                                 </button>
                             </li>

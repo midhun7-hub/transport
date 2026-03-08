@@ -1,19 +1,21 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 
-function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLogout }) {
+function Summary({ preference, vehicle, user, onConfirmBooking, onLogout }) {
+  const navigate = useNavigate();
   const distance = parseInt(preference.distance) || 0;
   const total = vehicle.pricePerKm * distance;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
-      <NavigationBar onNavigate={onNavigate} user={user} onLogout={onLogout} />
+      <NavigationBar user={user} onLogout={onLogout} />
 
       <main className="flex-1 max-w-2xl mx-auto py-12 px-6 w-full">
         <div className="mb-8">
           <button
-            onClick={() => onNavigate("booking")}
+            onClick={() => navigate("/booking")}
             className="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-4 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,13 +134,13 @@ function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLo
           {/* Actions */}
           <div className="flex gap-4">
             <button
-              onClick={() => onNavigate("home")}
+              onClick={() => navigate("/")}
               className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
-              onClick={onConfirmBooking}
+              onClick={() => navigate("/payment")}
               className="flex-1 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-green-500/25 transition-all"
             >
               Proceed to Pay
@@ -147,7 +149,7 @@ function Summary({ preference, vehicle, user, onNavigate, onConfirmBooking, onLo
         </div>
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

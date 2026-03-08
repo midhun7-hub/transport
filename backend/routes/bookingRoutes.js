@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const User = require("../models/User");
+const Vehicle = require("../models/Vehicle");
+const Driver = require("../models/Driver");
 const jwt = require("jsonwebtoken");
 
 // Auth Middleware
@@ -15,6 +17,7 @@ const auth = (req, res, next) => {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.userId = decoded.id;
+        req.userRole = decoded.role;
         next();
     } catch (err) {
         if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
@@ -124,14 +127,60 @@ router.put("/admin/bookings/:id/assign-driver", adminAuth, async (req, res) => {
             return res.status(404).json({ message: "Booking not found" });
         }
 
+        const driver = await Driver.findById(driverId).populate("vehicle");
+        if (!driver) {
+            return res.status(404).json({ message: "Driver not found" });
+        }
+
+        // Update Driver status
+        driver.status = "On Trip";
+        await driver.save();
+
+        // Update Vehicle availability if driver has a vehicle
+        if (driver.vehicle) {
+            await Vehicle.findByIdAndUpdate(driver.vehicle._id, { availability: false });
+        }
+
         booking.driver = driverId;
-        booking.status = "In Transit"; // Optional, maybe Admin confirms it first
+        booking.status = "In Transit";
         await booking.save();
 
-        res.json({ message: "Driver assigned successfully", booking });
+        res.json({ message: "Driver assigned and status updated", booking });
     } catch (err) {
         console.error("Assign driver error:", err);
         res.status(500).json({ message: "Failed to assign driver" });
+    }
+});
+
+// UPDATE BOOKING STATUS (Admin only)
+router.put("/admin/bookings/:id/status", adminAuth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        const booking = await Booking.findById(req.params.id).populate({
+            path: 'driver',
+            populate: { path: 'vehicle' }
+        });
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        const oldStatus = booking.status;
+        booking.status = status;
+        await booking.save();
+
+        // If status becomes Completed or Cancelled, free up driver and vehicle
+        if (["Completed", "Cancelled"].includes(status) && booking.driver) {
+            await Driver.findByIdAndUpdate(booking.driver._id, { status: "Available" });
+            if (booking.driver.vehicle) {
+                await Vehicle.findByIdAndUpdate(booking.driver.vehicle._id, { availability: true });
+            }
+        }
+
+        res.json({ message: `Booking status updated to ${status}`, booking });
+    } catch (err) {
+        console.error("Update status error:", err);
+        res.status(500).json({ message: "Failed to update status" });
     }
 });
 
@@ -189,8 +238,21 @@ router.put("/bookings/:id/cancel", auth, async (req, res) => {
             return res.status(400).json({ message: "Cannot cancel a completed booking" });
         }
 
+        const oldStatus = booking.status;
         booking.status = "Cancelled";
         await booking.save();
+
+        // Free up driver and vehicle if already assigned
+        if (booking.driver) {
+            const driver = await Driver.findById(booking.driver).populate("vehicle");
+            if (driver) {
+                driver.status = "Available";
+                await driver.save();
+                if (driver.vehicle) {
+                    await Vehicle.findByIdAndUpdate(driver.vehicle._id, { availability: true });
+                }
+            }
+        }
 
         console.log(`✅ Booking cancelled: ${booking._id}`);
 
