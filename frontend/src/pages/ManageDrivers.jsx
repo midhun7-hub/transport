@@ -172,15 +172,21 @@ const ManageDrivers = () => {
                                     className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors"
                                     onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-500'); }}
                                     onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-500'); }}
-                                    onDrop={(e) => {
+                                    onDrop={async (e) => {
                                         e.preventDefault();
                                         e.currentTarget.classList.remove('border-blue-500');
                                         const file = e.dataTransfer.files[0];
                                         if (file) {
-                                            const reader = new FileReader();
-                                            reader.onload = (re) => setFormData({ ...formData, image: re.target.result });
-                                            reader.readAsDataURL(file);
-                                            toast.success("Photo selected");
+                                            const uploadData = new FormData();
+                                            uploadData.append('image', file);
+                                            const loadingToast = toast.loading("Uploading image...");
+                                            try {
+                                                const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                setFormData({ ...formData, image: res.data.imageUrl });
+                                                toast.success("Image uploaded successfully", { id: loadingToast });
+                                            } catch (err) {
+                                                toast.error("Image upload failed", { id: loadingToast });
+                                            }
                                         }
                                     }}
                                     onClick={() => document.getElementById('driver-image-input').click()}
@@ -197,13 +203,19 @@ const ManageDrivers = () => {
                                         id="driver-image-input"
                                         className="hidden"
                                         accept="image/*"
-                                        onChange={(e) => {
+                                        onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (file) {
-                                                const reader = new FileReader();
-                                                reader.onload = (re) => setFormData({ ...formData, image: re.target.result });
-                                                reader.readAsDataURL(file);
-                                                toast.success("Photo selected");
+                                                const uploadData = new FormData();
+                                                uploadData.append('image', file);
+                                                const loadingToast = toast.loading("Uploading image...");
+                                                try {
+                                                    const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                    setFormData({ ...formData, image: res.data.imageUrl });
+                                                    toast.success("Image uploaded successfully", { id: loadingToast });
+                                                } catch (err) {
+                                                    toast.error("Image upload failed", { id: loadingToast });
+                                                }
                                             }
                                         }}
                                     />

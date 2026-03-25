@@ -168,15 +168,16 @@ const ManageVehicles = () => {
                                         e.currentTarget.classList.remove('border-blue-500');
                                         const file = e.dataTransfer.files[0];
                                         if (file) {
-                                            // Simulated upload for now - in real app, use Cloudinary or direct upload
-                                            // For this demo, we'll store a mock URL if no real backend upload is ready
-                                            // But let's assume useCloudinaryWidget can be adapted or we just use simple base64/placeholder
-                                            const reader = new FileReader();
-                                            reader.onload = (readerEvent) => {
-                                                setFormData({ ...formData, image: readerEvent.target.result });
-                                                toast.success("Photo selected");
-                                            };
-                                            reader.readAsDataURL(file);
+                                            const uploadData = new FormData();
+                                            uploadData.append('image', file);
+                                            const loadingToast = toast.loading("Uploading image...");
+                                            try {
+                                                const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                setFormData({ ...formData, image: res.data.imageUrl });
+                                                toast.success("Image uploaded successfully", { id: loadingToast });
+                                            } catch (err) {
+                                                toast.error("Image upload failed", { id: loadingToast });
+                                            }
                                         }
                                     }}
                                     onClick={() => document.getElementById('vehicle-image-input').click()}
@@ -193,15 +194,19 @@ const ManageVehicles = () => {
                                         id="vehicle-image-input"
                                         className="hidden"
                                         accept="image/*"
-                                        onChange={(e) => {
+                                        onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (file) {
-                                                const reader = new FileReader();
-                                                reader.onload = (readerEvent) => {
-                                                    setFormData({ ...formData, image: readerEvent.target.result });
-                                                    toast.success("Photo selected");
-                                                };
-                                                reader.readAsDataURL(file);
+                                                const uploadData = new FormData();
+                                                uploadData.append('image', file);
+                                                const loadingToast = toast.loading("Uploading image...");
+                                                try {
+                                                    const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                    setFormData({ ...formData, image: res.data.imageUrl });
+                                                    toast.success("Image uploaded successfully", { id: loadingToast });
+                                                } catch (err) {
+                                                    toast.error("Image upload failed", { id: loadingToast });
+                                                }
                                             }
                                         }}
                                     />

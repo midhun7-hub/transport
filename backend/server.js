@@ -11,6 +11,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const driverRoutes = require("./routes/driverRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 
 const app = express();
@@ -62,6 +63,7 @@ app.use("/api", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api", vehicleRoutes);
 app.use("/api", driverRoutes);
+app.use("/api", uploadRoutes);
 
 // 404 Handler
 app.use((req, res) => {

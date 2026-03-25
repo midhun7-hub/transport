@@ -1,12 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
-import { vehicleData } from "../data/vehicles";
+import axios from "axios";
 import VehicleCard from "../Components/VehicleCard";
 
 function About({ user, onLogout }) {
   const navigate = useNavigate();
+  const [vehicles, setVehicles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/api/vehicles");
+      setVehicles(res.data.filter(v => v.availability));
+    } catch (error) {
+      console.error("Failed to load vehicles");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
       <NavigationBar user={user} onLogout={onLogout} />
@@ -21,11 +39,24 @@ function About({ user, onLogout }) {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {vehicleData.map((vehicle, i) => (
-            <VehicleCard key={i} vehicle={vehicle} onBook={() => navigate("/preference")} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="text-center w-full py-12"><p className="text-gray-500">Loading vehicles...</p></div>
+        ) : vehicles.length === 0 ? (
+          <div className="text-center w-full py-12"><p className="text-gray-500">No vehicles available at the moment.</p></div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {vehicles.map((v, i) => {
+              const displayVehicle = {
+                ...v,
+                img: v.image || 'https://via.placeholder.com/300x200',
+                capacity: `${v.capacity / 1000} Tons`,
+                details: v.type,
+                rent: v.pricePerKm
+              };
+              return <VehicleCard key={v._id || i} vehicle={displayVehicle} onBook={() => navigate("/preference")} />;
+            })}
+          </div>
+        )}
 
         {/* Why Choose Section */}
         <section className="mt-20">
