@@ -56,7 +56,7 @@ function Contact({ user, onLogout }) {
                   <p className="text-gray-600">
                     1/252-B, Sembianallur,<br />
                     Avinashi-641 654,<br />
-                    Tamil Nadu, India - 110001
+                    Tamil Nadu, India
                   </p>
                 </div>
               </div>

@@ -6,6 +6,10 @@ const PendingBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [drivers, setDrivers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedBookingForTracking, setSelectedBookingForTracking] = useState(null);
+    const [trackingState, setTrackingState] = useState({
+        vehicleReached: false, cargoLoaded: false, inTransit: false, reachedDrop: false, cargoUnloaded: false
+    });
 
     const checkAuth = () => ({
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
@@ -48,6 +52,25 @@ const PendingBookings = () => {
             fetchData();
         } catch (error) {
             toast.error("Failed to assign driver");
+        }
+    };
+
+    const handleOpenTrackingModal = (booking) => {
+        setSelectedBookingForTracking(booking);
+        setTrackingState(booking.tracking || {
+            vehicleReached: false, cargoLoaded: false, inTransit: false, reachedDrop: false, cargoUnloaded: false
+        });
+    };
+
+    const handleUpdateTracking = async () => {
+        if (!selectedBookingForTracking) return;
+        try {
+            await axios.put(`http://localhost:5001/api/admin/bookings/${selectedBookingForTracking._id}/tracking`, { tracking: trackingState }, checkAuth());
+            toast.success("Tracking updated successfully");
+            setSelectedBookingForTracking(null);
+            fetchData();
+        } catch (error) {
+            toast.error("Failed to update tracking");
         }
     };
 
@@ -140,6 +163,12 @@ const PendingBookings = () => {
                                             <option value="Completed">Completed</option>
                                             <option value="Cancelled">Cancelled</option>
                                         </select>
+                                        <button
+                                            onClick={() => handleOpenTrackingModal(b)}
+                                            className="w-40 py-1.5 px-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-center mt-2 mx-auto sm:mx-0"
+                                        >
+                                            Update Tracking
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -154,6 +183,38 @@ const PendingBookings = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Tracking Modal */}
+            {selectedBookingForTracking && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-2xl">
+                        <h2 className="text-xl font-bold mb-6 text-gray-800">Update Tracking</h2>
+                        <div className="space-y-4">
+                            {[
+                                { key: 'vehicleReached', label: 'Vehicle Reached Pickup' },
+                                { key: 'cargoLoaded', label: 'Cargo Loaded' },
+                                { key: 'inTransit', label: 'In Transit' },
+                                { key: 'reachedDrop', label: 'Reached Drop Location' },
+                                { key: 'cargoUnloaded', label: 'Cargo Unloaded' }
+                            ].map((step) => (
+                                <label key={step.key} className="flex items-center space-x-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={trackingState[step.key]}
+                                        onChange={(e) => setTrackingState({ ...trackingState, [step.key]: e.target.checked })}
+                                        className="h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300"
+                                    />
+                                    <span className="text-gray-700 font-medium">{step.label}</span>
+                                </label>
+                            ))}
+                        </div>
+                        <div className="flex justify-end space-x-3 mt-8">
+                            <button onClick={() => setSelectedBookingForTracking(null)} className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleUpdateTracking} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Save</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

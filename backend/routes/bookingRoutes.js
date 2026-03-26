@@ -184,6 +184,26 @@ router.put("/admin/bookings/:id/status", adminAuth, async (req, res) => {
     }
 });
 
+// UPDATE TRACKING STATUS (Admin only)
+router.put("/admin/bookings/:id/tracking", adminAuth, async (req, res) => {
+    try {
+        const { tracking } = req.body;
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        booking.tracking = { ...booking.tracking, ...tracking };
+        await booking.save();
+
+        res.json({ message: "Tracking updated successfully", booking });
+    } catch (err) {
+        console.error("Update tracking error:", err);
+        res.status(500).json({ message: "Failed to update tracking" });
+    }
+});
+
 // GET ALL USER BOOKINGS
 router.get("/bookings", auth, async (req, res) => {
     try {

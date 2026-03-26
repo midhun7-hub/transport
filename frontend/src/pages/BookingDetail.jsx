@@ -109,6 +109,35 @@ function BookingDetail({ user, onLogout }) {
                         </div>
                     </div>
 
+                    {/* Order Tracking Timeline */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <span>📍</span> Live Tracking
+                        </h2>
+                        
+                        <div className="relative pl-4 space-y-6">
+                            <div className="absolute left-[1.6rem] top-2 bottom-2 w-0.5 bg-gray-200"></div>
+
+                            {[
+                                { key: 'vehicleReached', label: 'Vehicle Reached Pickup' },
+                                { key: 'cargoLoaded', label: 'Cargo Loaded' },
+                                { key: 'inTransit', label: 'In Transit' },
+                                { key: 'reachedDrop', label: 'Reached Drop Location' },
+                                { key: 'cargoUnloaded', label: 'Cargo Unloaded' }
+                            ].map((step, index) => {
+                                const isCompleted = booking?.tracking?.[step.key];
+                                return (
+                                    <div key={index} className="relative flex items-center gap-4 z-10">
+                                        <div className={`w-5 h-5 rounded-full outline outline-4 outline-white flex-shrink-0 border-4 ${isCompleted ? 'bg-green-500 border-green-200' : 'bg-gray-300 border-gray-100'}`}></div>
+                                        <div>
+                                            <p className={`font-semibold ${isCompleted ? 'text-gray-900' : 'text-gray-500'}`}>{step.label}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     {/* Route & Vehicle */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">

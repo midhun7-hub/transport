@@ -8,7 +8,7 @@ const ManageDrivers = () => {
     const [vehicles, setVehicles] = useState([]);
     const [isModalsOpen, setIsModalsOpen] = useState(false);
     const [formData, setFormData] = useState({
-        name: '', contact: '', licenseNumber: '', vehicle: '', status: 'Available', image: ''
+        name: '', contact: '', licenseNumber: '', vehicle: '', status: 'Available'
     });
     const [editId, setEditId] = useState(null);
 
@@ -40,12 +40,11 @@ const ManageDrivers = () => {
                 contact: driver.contact,
                 licenseNumber: driver.licenseNumber,
                 vehicle: driver.vehicle ? driver.vehicle._id : '',
-                status: driver.status,
-                image: driver.image || ''
+                status: driver.status
             });
             setEditId(driver._id);
         } else {
-            setFormData({ name: '', contact: '', licenseNumber: '', vehicle: '', status: 'Available', image: '' });
+            setFormData({ name: '', contact: '', licenseNumber: '', vehicle: '', status: 'Available' });
             setEditId(null);
         }
         setIsModalsOpen(true);
@@ -111,8 +110,8 @@ const ManageDrivers = () => {
                             <tr key={d._id} className={d.status === 'On Trip' ? 'bg-gray-50 italic text-gray-400' : ''}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className={`flex items-center ${d.status === 'On Trip' ? 'opacity-50' : ''}`}>
-                                        <div className="h-10 w-10 flex-shrink-0">
-                                            <img className="h-10 w-10 rounded-full object-cover border border-gray-200" src={d.image || 'https://via.placeholder.com/40?text=Driver'} alt="" />
+                                        <div className="h-10 w-10 flex-shrink-0 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold border border-blue-200">
+                                            {d.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="ml-4">
                                             <div className="text-sm font-medium text-gray-900">{d.name}</div>
@@ -165,63 +164,6 @@ const ManageDrivers = () => {
                                 <label className="block text-sm font-medium text-gray-700">License Number</label>
                                 <input required type="text" value={formData.licenseNumber} onChange={e => setFormData({ ...formData, licenseNumber: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. DL-123456789" />
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Driver Photo</label>
-                                <div
-                                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors"
-                                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-500'); }}
-                                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-500'); }}
-                                    onDrop={async (e) => {
-                                        e.preventDefault();
-                                        e.currentTarget.classList.remove('border-blue-500');
-                                        const file = e.dataTransfer.files[0];
-                                        if (file) {
-                                            const uploadData = new FormData();
-                                            uploadData.append('image', file);
-                                            const loadingToast = toast.loading("Uploading image...");
-                                            try {
-                                                const res = await axios.post('http://localhost:5001/api/upload', uploadData);
-                                                setFormData({ ...formData, image: res.data.imageUrl });
-                                                toast.success("Image uploaded successfully", { id: loadingToast });
-                                            } catch (err) {
-                                                toast.error("Image upload failed", { id: loadingToast });
-                                            }
-                                        }
-                                    }}
-                                    onClick={() => document.getElementById('driver-image-input').click()}
-                                >
-                                    {formData.image ? (
-                                        <img src={formData.image} alt="Preview" className="h-32 w-32 object-cover rounded-full mx-auto border-2 border-blue-100" />
-                                    ) : (
-                                        <div className="py-2">
-                                            <p className="text-gray-500 text-sm">Drag & drop photo here or click to upload</p>
-                                        </div>
-                                    )}
-                                    <input
-                                        type="file"
-                                        id="driver-image-input"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={async (e) => {
-                                            const file = e.target.files[0];
-                                            if (file) {
-                                                const uploadData = new FormData();
-                                                uploadData.append('image', file);
-                                                const loadingToast = toast.loading("Uploading image...");
-                                                try {
-                                                    const res = await axios.post('http://localhost:5001/api/upload', uploadData);
-                                                    setFormData({ ...formData, image: res.data.imageUrl });
-                                                    toast.success("Image uploaded successfully", { id: loadingToast });
-                                                } catch (err) {
-                                                    toast.error("Image upload failed", { id: loadingToast });
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Assign Vehicle (Optional)</label>
                                 <select value={formData.vehicle} onChange={e => setFormData({ ...formData, vehicle: e.target.value })} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">

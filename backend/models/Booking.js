@@ -99,6 +99,13 @@ const bookingSchema = new mongoose.Schema({
         default: "",
         maxlength: 500,
     },
+    tracking: {
+        vehicleReached: { type: Boolean, default: false },
+        cargoLoaded: { type: Boolean, default: false },
+        inTransit: { type: Boolean, default: false },
+        reachedDrop: { type: Boolean, default: false },
+        cargoUnloaded: { type: Boolean, default: false },
+    },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

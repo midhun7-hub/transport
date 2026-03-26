@@ -64,15 +64,15 @@ function Footer() {
                         <ul className="space-y-3 text-gray-400">
                             <li className="flex items-start gap-3">
                                 <span className="text-xl">📍</span>
-                                <span>202, Main Street,<br />Industrial Area,<br />New Delhi, India</span>
+                                <span>1/252-B, Sembianallur,<br />Avinashi-641 654,<br />Tamil Nadu, India</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <span className="text-xl">📞</span>
-                                <span>+91 12345 67890</span>
+                                <span>+91 9894335735</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <span className="text-xl">✉️</span>
-                                <span>support@easycart.com</span>
+                                <span>midhun77msdcr@gmail.com</span>
                             </li>
                         </ul>
                     </div>
