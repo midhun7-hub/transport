@@ -12,6 +12,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 
 const app = express();
@@ -48,7 +49,7 @@ app.use(cors({
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
-    message: "EasyCart Backend is running",
+    message: "CargoLink Backend is running",
     version: "1.0.0",
     timestamp: new Date().toISOString()
   });
@@ -64,6 +65,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api", vehicleRoutes);
 app.use("/api", driverRoutes);
 app.use("/api", uploadRoutes);
+app.use("/api/contact", contactRoutes);
 
 // 404 Handler
 app.use((req, res) => {
@@ -80,7 +82,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`\n🚚 EasyCart Backend Server`);
+  console.log(`\n🚚 CargoLink Backend Server`);
   console.log(`   ➜ Local:   http://localhost:${PORT}`);
   console.log(`   ➜ Status:  Running ✅\n`);
 });

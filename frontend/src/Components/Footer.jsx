@@ -10,9 +10,9 @@ function Footer() {
                     {/* Brand */}
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-2 text-xl font-bold mb-4">
-                            <span className="text-2xl">🚚</span>
+                            <img src="/logo.png" alt="CargoLink" className="h-8 object-contain" />
                             <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                                EasyCart
+                                CargoLink
                             </span>
                         </div>
                         <p className="text-gray-400 max-w-md">
@@ -81,7 +81,7 @@ function Footer() {
                 {/* Bottom Bar */}
                 <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-gray-500 text-sm">
-                        © {new Date().getFullYear()} EasyCart. All rights reserved.
+                        © {new Date().getFullYear()} CargoLink. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-sm text-gray-500">
                         <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

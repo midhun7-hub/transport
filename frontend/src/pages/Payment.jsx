@@ -74,7 +74,7 @@ function Payment({ preference, vehicle, user, onLogout }) {
         key: "rzp_test_SOmN1JYplRyzpx",
         amount: orderData.amount,
         currency: "INR",
-        name: "EasyCart Transport",
+        name: "CargoLink Transport",
         description: `${preference?.from} → ${preference?.to}`,
         order_id: orderData.id,
         handler: function () {

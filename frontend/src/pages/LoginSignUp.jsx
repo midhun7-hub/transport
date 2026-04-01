@@ -126,11 +126,11 @@ function LoginSignUp({ onLogin }) {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center gap-3 mb-2">
-            <span className="text-5xl">🚚</span>
+          <div className="flex justify-center mb-2">
+            <img src="/logo.png" alt="CargoLink" className="h-16 object-contain" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            EasyCart
+            CargoLink
           </h1>
           <p className="text-gray-500 mt-1">
             {isSignUp ? "Create your account" : "Welcome back!"}

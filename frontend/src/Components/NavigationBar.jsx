@@ -26,9 +26,9 @@ function NavigationBar({ user, onLogout }) {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
           >
-            <span className="text-2xl">🚚</span>
+            <img src="/logo.png" alt="CargoLink" className="h-8 object-contain" />
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              EasyCart
+              CargoLink
             </span>
           </button>
 

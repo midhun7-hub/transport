@@ -15,7 +15,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "easycart", // Cloudinary folder name
+        folder: "cargolink", // Cloudinary folder name
         allowed_formats: ["jpg", "png", "jpeg", "webp"],
     },
 });

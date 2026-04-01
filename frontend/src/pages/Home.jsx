@@ -29,58 +29,66 @@ function Home({ user, onLogout }) {
             <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"></div>
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-            <div className="text-center max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-
-              </div>
-
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Transport your cargo
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent block mt-2">
-                  safely & reliably
-                </span>
-              </h1>
-
-              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                India's most trusted cargo transport service. Book vehicles instantly,
-                track shipments in real-time, and enjoy hassle-free logistics.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => navigate("/preference")}
-                  className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    Rent Vehicle
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Left Content */}
+              <div className="max-w-xl">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                  Transport your cargo
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent block mt-2">
+                    safely & reliably
                   </span>
-                </button>
-                <button
-                  onClick={() => navigate("/about")}
-                  className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-lg hover:border-blue-300 hover:text-blue-600 transition-all"
-                >
-                  View Vehicles
-                </button>
+                </h1>
+
+                <p className="text-lg md:text-xl text-gray-600 mb-8">
+                  India's most trusted cargo transport service. Book vehicles instantly,
+                  track shipments in real-time, and enjoy hassle-free logistics.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={() => navigate("/preference")}
+                    className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      Rent Vehicle
+                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => navigate("/about")}
+                    className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-lg hover:border-blue-300 hover:text-blue-600 transition-all"
+                  >
+                    View Vehicles
+                  </button>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4 md:gap-8 mt-16">
+                  <div>
+                    <p className="text-3xl md:text-4xl font-bold text-blue-600">10K+</p>
+                    <p className="text-sm text-gray-500 mt-1">Happy Customers</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl md:text-4xl font-bold text-blue-600">10+</p>
+                    <p className="text-sm text-gray-500 mt-1">Vehicles Available</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl md:text-4xl font-bold text-blue-600">50K+</p>
+                    <p className="text-sm text-gray-500 mt-1">Trips Completed</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 md:gap-8 mt-16 max-w-xl mx-auto">
-                <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-bold text-blue-600">10K+</p>
-                  <p className="text-sm text-gray-500 mt-1">Happy Customers</p>
-                </div>
-                <div>
-                  <p className="text-3xl md:text-4xl font-bold text-blue-600">50+</p>
-                  <p className="text-sm text-gray-500 mt-1">Vehicles Available</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-bold text-blue-600">50K+</p>
-                  <p className="text-sm text-gray-500 mt-1">Trips Completed</p>
-                </div>
+              {/* Right Content - Logo Image */}
+              <div className="hidden md:flex justify-center items-center relative">
+                <img
+                  src="/logo.png"
+                  alt="CargoLink Hero"
+                  className="relative z-10 w-full max-w-lg object-contain hover:scale-105 transition-transform duration-500 mix-blend-multiply"
+                />
               </div>
             </div>
           </div>
@@ -90,7 +98,7 @@ function Home({ user, onLogout }) {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose EasyCart?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose CargoLink?</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 We provide the best logistics solutions tailored to your needs
               </p>
