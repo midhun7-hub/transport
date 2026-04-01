@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { API_URL } from "../config";
+import { GoogleLogin } from "@react-oauth/google";
 
 function LoginSignUp({ onLogin }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -87,6 +88,31 @@ function LoginSignUp({ onLogin }) {
       setLoading(false);
     }
   }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Google authentication failed");
+
+      if (onLogin) onLogin(json);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google Auth Login Failed");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
@@ -240,8 +266,19 @@ function LoginSignUp({ onLogin }) {
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-sm text-gray-400">or</span>
+            <span className="text-sm text-gray-400">or continue with</span>
             <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="pill"
+            />
           </div>
 
           {/* Toggle */}
