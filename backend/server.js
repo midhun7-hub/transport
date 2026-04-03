@@ -17,10 +17,7 @@ const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-
-// CORS Configuration - Allow frontend origins
+// 1. CORS Configuration (MUST be first)
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "https://cargolink-one.vercel.app",
@@ -28,16 +25,13 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5175",
   "http://localhost:3000",
-].filter(Boolean).map(origin => origin.replace(/\/$/, ""));
+].filter(Boolean).map(origin => origin.toLowerCase().replace(/\/$/, ""));
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-
-    const normalizedOrigin = origin.replace(/\/$/, "");
-
-    if (allowedOrigins.includes(normalizedOrigin)) {
+    const normalizedOrigin = origin.toLowerCase().replace(/\/$/, "");
+    if (allowedOrigins.includes(normalizedOrigin) || normalizedOrigin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
       console.warn(`CORS blocked request from origin: ${origin}`);
@@ -48,6 +42,9 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
+// 2. Body Parser
+app.use(express.json());
 
 // Health check route
 app.get("/", (req, res) => {
