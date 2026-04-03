@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, Users, CalendarDays, LogOut } from 'lucide-react';
+import { LayoutDashboard, Truck, Users, CalendarDays, LogOut, Inbox } from 'lucide-react';
 
 const AdminLayout = ({ user, onLogout }) => {
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ const AdminLayout = ({ user, onLogout }) => {
         { path: '/admin/vehicles', icon: <Truck size={20} />, label: 'Vehicles' },
         { path: '/admin/drivers', icon: <Users size={20} />, label: 'Drivers' },
         { path: '/admin/bookings', icon: <CalendarDays size={20} />, label: 'Bookings' },
+        { path: '/admin/inbox', icon: <Inbox size={20} />, label: 'Inbox' },
     ];
 
     return (

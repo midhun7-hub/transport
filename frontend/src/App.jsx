@@ -6,6 +6,8 @@ import LoginSignUp from "./pages/LoginSignUp";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
+import Refund from "./pages/Refund";
 import Preference from "./pages/Preference";
 import Booking from "./pages/Booking";
 import Summary from "./pages/Summary";
@@ -20,6 +22,7 @@ import ManageVehicles from "./pages/ManageVehicles";
 import ManageDrivers from "./pages/ManageDrivers";
 import PendingBookings from "./pages/PendingBookings";
 import NavigationBar from "./Components/NavigationBar";
+import AdminInbox from "./pages/AdminInbox";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem("token");
@@ -122,6 +125,8 @@ function App() {
         } />
         <Route path="/about" element={<ProtectedRoute allowedRoles={["user", "admin"]}><About user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/contact" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Contact user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/terms" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Terms user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/refund" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Refund user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Profile user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute allowedRoles={["user", "admin"]}><BookingHistory user={user} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/history/:id" element={<ProtectedRoute allowedRoles={["user", "admin"]}><BookingDetail user={user} onLogout={handleLogout} /></ProtectedRoute>} />
@@ -139,6 +144,7 @@ function App() {
           <Route path="vehicles" element={<ManageVehicles />} />
           <Route path="drivers" element={<ManageDrivers />} />
           <Route path="bookings" element={<PendingBookings />} />
+          <Route path="inbox" element={<AdminInbox />} />
         </Route>
 
         {/* Wildcard */}

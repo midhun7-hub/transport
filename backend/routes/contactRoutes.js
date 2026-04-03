@@ -1,8 +1,39 @@
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+const Message = require("../models/Message");
 
-// POST /api/contact
+// Auth Middleware (from bookingRoutes)
+const auth = (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.id;
+        req.userRole = decoded.role;
+        next();
+    } catch (err) {
+        if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+            return res.status(401).json({ message: "Invalid or expired token" });
+        }
+        return res.status(500).json({ message: "Authentication error" });
+    }
+};
+
+const adminAuth = (req, res, next) => {
+    auth(req, res, () => {
+        if (req.userRole !== "admin") {
+            return res.status(403).json({ message: "Admin access required" });
+        }
+        next();
+    });
+};
+
+// POST /api/contact - Save message to DB
 router.post("/", async (req, res) => {
     const { name, email, phone, message } = req.body;
 
@@ -11,47 +42,68 @@ router.post("/", async (req, res) => {
     }
 
     try {
-        // Create a transporter using SMTP settings from .env
-        // Defaulting to Brevo's relay since it was used previously
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
-            port: process.env.SMTP_PORT || 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER, 
-                pass: process.env.SMTP_PASS, 
-            },
+        const newMessage = new Message({
+            name,
+            email,
+            phone,
+            message,
         });
 
-        // Email options
-        const mailOptions = {
-            from: `"${name}" <${process.env.SMTP_USER || email}>`, // It's safer to send from the authenticated SMTP_USER to avoid spam filters, and reply-to the user
-            replyTo: email,
-            to: "midhun77msdcr@gmail.com", // The final destination
-            subject: `New Contact Form Submission from ${name}`,
-            text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || "N/A"}\n\nMessage:\n${message}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #2563eb;">New CargoLink Contact Request 🚚</h2>
-                    <p><strong>Name:</strong> ${name}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Phone:</strong> ${phone || "Not provided"}</p>
-                    <hr style="border: 1px solid #eee; margin: 20px 0;" />
-                    <h3>Message:</h3>
-                    <p style="white-space: pre-wrap; background: #f9f9f9; padding: 15px; border-radius: 8px;">${message}</p>
-                </div>
-            `,
-        };
+        await newMessage.save();
 
-        // Send mail
-        await transporter.sendMail(mailOptions);
-        
-        console.log(`✅ Contact email sent from ${email}`);
+        console.log(`✅ Contact message saved from ${email}`);
         res.status(200).json({ message: "Message sent successfully!" });
 
     } catch (error) {
-        console.error("Email sending error:", error);
-        res.status(500).json({ message: "Failed to send message. Please ensure SMTP credentials are configured." });
+        console.error("Message saving error:", error);
+        res.status(500).json({ message: "Failed to send message." });
+    }
+});
+
+// GET /api/contact - Admin only, get all messages
+router.get("/", adminAuth, async (req, res) => {
+    try {
+        const messages = await Message.find({}).sort({ createdAt: -1 }).lean();
+        res.json(messages);
+    } catch (error) {
+        console.error("Get messages error:", error);
+        res.status(500).json({ message: "Failed to fetch messages." });
+    }
+});
+
+// PATCH /api/contact/:id/status - Admin only, toggle read status
+router.patch("/:id/status", adminAuth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        const message = await Message.findById(req.params.id);
+
+        if (!message) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+
+        message.status = status;
+        await message.save();
+
+        res.json({ message: `Message status updated to ${status}`, updatedMessage: message });
+    } catch (error) {
+        console.error("Update message status error:", error);
+        res.status(500).json({ message: "Failed to update message status." });
+    }
+});
+
+// DELETE /api/contact/:id - Admin only, delete a message
+router.delete("/:id", adminAuth, async (req, res) => {
+    try {
+        const message = await Message.findByIdAndDelete(req.params.id);
+
+        if (!message) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+
+        res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+        console.error("Delete message error:", error);
+        res.status(500).json({ message: "Failed to delete message." });
     }
 });
 

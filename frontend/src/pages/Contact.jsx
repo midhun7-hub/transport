@@ -26,7 +26,7 @@ function Contact({ user, onLogout }) {
     setStatus(null);
 
     try {
-      const res = await fetch(`${API_URL}/contact`, {
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -71,7 +71,7 @@ function Contact({ user, onLogout }) {
                 <div>
                   <h3 className="font-bold text-gray-800">Phone</h3>
                   <p className="text-gray-600">+91 9894335735</p>
-                  <p className="text-sm text-gray-500">Mon-Sat, 9am to 6pm</p>
+                  <p className="text-sm text-gray-500">We reply within 24 hours</p>
                 </div>
               </div>
 
@@ -118,9 +118,8 @@ function Contact({ user, onLogout }) {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Send a Message</h2>
 
             {status && (
-              <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${
-                status.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
-              }`}>
+              <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${status.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+                }`}>
                 <div className="text-xl">{status.type === 'success' ? '✅' : '⚠️'}</div>
                 <div>
                   <p className="font-medium">{status.type === 'success' ? 'Success' : 'Error'}</p>
