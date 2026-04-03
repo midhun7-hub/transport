@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
@@ -18,8 +19,8 @@ const PendingBookings = () => {
     const fetchData = async () => {
         try {
             const [bookingsRes, driversRes] = await Promise.all([
-                axios.get('http://localhost:5001/api/admin/bookings', checkAuth()),
-                axios.get('http://localhost:5001/api/drivers', checkAuth())
+                axios.get(`${API_URL}/api/admin/bookings`, checkAuth()),
+                axios.get(`${API_URL}/api/drivers`, checkAuth())
             ]);
             setBookings(bookingsRes.data);
             setDrivers(driversRes.data.filter(d => d.status === 'Available'));
@@ -36,7 +37,7 @@ const PendingBookings = () => {
 
     const handleStatusUpdate = async (bookingId, newStatus) => {
         try {
-            await axios.put(`http://localhost:5001/api/admin/bookings/${bookingId}/status`, { status: newStatus }, checkAuth());
+            await axios.put(`${API_URL}/api/admin/bookings/${bookingId}/status`, { status: newStatus }, checkAuth());
             toast.success(`Status updated to ${newStatus}`);
             fetchData();
         } catch (error) {
@@ -47,7 +48,7 @@ const PendingBookings = () => {
     const handleAssignDriver = async (bookingId, driverId) => {
         if (!driverId) return;
         try {
-            await axios.put(`http://localhost:5001/api/admin/bookings/${bookingId}/assign-driver`, { driverId }, checkAuth());
+            await axios.put(`${API_URL}/api/admin/bookings/${bookingId}/assign-driver`, { driverId }, checkAuth());
             toast.success("Driver assigned successfully");
             fetchData();
         } catch (error) {
@@ -65,7 +66,7 @@ const PendingBookings = () => {
     const handleUpdateTracking = async () => {
         if (!selectedBookingForTracking) return;
         try {
-            await axios.put(`http://localhost:5001/api/admin/bookings/${selectedBookingForTracking._id}/tracking`, { tracking: trackingState }, checkAuth());
+            await axios.put(`${API_URL}/api/admin/bookings/${selectedBookingForTracking._id}/tracking`, { tracking: trackingState }, checkAuth());
             toast.success("Tracking updated successfully");
             setSelectedBookingForTracking(null);
             fetchData();

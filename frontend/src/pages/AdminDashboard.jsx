@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 import { Truck, Users, CalendarDays, CheckCircle, TrendingUp } from 'lucide-react';
 
@@ -33,9 +34,9 @@ const AdminDashboard = () => {
             try {
                 // Fetch all required data to compute stats
                 const [vehiclesRes, driversRes, bookingsRes] = await Promise.all([
-                    axios.get('http://localhost:5001/api/vehicles', checkAuth()), // Adjust mapping
-                    axios.get('http://localhost:5001/api/drivers', checkAuth()),
-                    axios.get('http://localhost:5001/api/admin/bookings', checkAuth()),
+                    axios.get(`${API_URL}/api/vehicles`, checkAuth()), // Adjust mapping
+                    axios.get(`${API_URL}/api/drivers`, checkAuth()),
+                    axios.get(`${API_URL}/api/admin/bookings`, checkAuth()),
                 ]);
 
                 const bookings = bookingsRes.data;

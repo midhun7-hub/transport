@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import useCloudinaryWidget from "../hooks/useCloudinaryWidget";
+import { API_URL } from "../config";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
@@ -17,7 +18,7 @@ function Profile({ user, onLogout }) {
     const handleUploadSuccess = async (url) => {
         setIsUploading(true);
         try {
-            const res = await axios.put('http://localhost:5001/api/auth/profile', { ...user, profileImage: url }, checkAuth());
+            const res = await axios.put(`${API_URL}/api/auth/profile`, { ...user, profileImage: url }, checkAuth());
             toast.success("Profile picture updated!");
             // This is a naive update, in reality you'd want a global context or to fetch user again
             if (res.data.user) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
@@ -19,8 +20,8 @@ const ManageDrivers = () => {
     const fetchData = async () => {
         try {
             const [driversRes, vehiclesRes] = await Promise.all([
-                axios.get('http://localhost:5001/api/drivers', checkAuth()),
-                axios.get('http://localhost:5001/api/vehicles', checkAuth())
+                axios.get(`${API_URL}/api/drivers`, checkAuth()),
+                axios.get(`${API_URL}/api/vehicles`, checkAuth())
             ]);
             setDrivers(driversRes.data);
             setVehicles(vehiclesRes.data);
@@ -56,10 +57,10 @@ const ManageDrivers = () => {
             const payload = { ...formData, vehicle: formData.vehicle || null };
 
             if (editId) {
-                await axios.put(`http://localhost:5001/api/drivers/${editId}`, payload, checkAuth());
+                await axios.put(`${API_URL}/api/drivers/${editId}`, payload, checkAuth());
                 toast.success("Driver updated successfully");
             } else {
-                await axios.post('http://localhost:5001/api/drivers', payload, checkAuth());
+                await axios.post(`${API_URL}/api/drivers`, payload, checkAuth());
                 toast.success("Driver added successfully");
             }
             fetchData();
@@ -72,7 +73,7 @@ const ManageDrivers = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this driver?")) {
             try {
-                await axios.delete(`http://localhost:5001/api/drivers/${id}`, checkAuth());
+                await axios.delete(`${API_URL}/api/drivers/${id}`, checkAuth());
                 toast.success("Driver deleted");
                 fetchData();
             } catch (error) {

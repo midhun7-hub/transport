@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 import { Mail, MailOpen, Trash2, CalendarDays, User, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -14,7 +15,7 @@ const AdminInbox = () => {
     const fetchMessages = async () => {
         setIsLoading(true);
         try {
-            const res = await axios.get('http://localhost:5001/api/contact', checkAuth());
+            const res = await axios.get(`${API_URL}/api/contact`, checkAuth());
             setMessages(res.data);
         } catch (error) {
             console.error("Error fetching messages:", error);
@@ -31,7 +32,7 @@ const AdminInbox = () => {
     const toggleStatus = async (id, currentStatus) => {
         const newStatus = currentStatus === 'unread' ? 'read' : 'unread';
         try {
-            await axios.patch(`http://localhost:5001/api/contact/${id}/status`, { status: newStatus }, checkAuth());
+            await axios.patch(`${API_URL}/api/contact/${id}/status`, { status: newStatus }, checkAuth());
             setMessages(messages.map(msg => msg._id === id ? { ...msg, status: newStatus } : msg));
             toast.success(`Message marked as ${newStatus}`);
         } catch (error) {
@@ -43,7 +44,7 @@ const AdminInbox = () => {
     const deleteMessage = async (id) => {
         if (!window.confirm("Are you sure you want to delete this message?")) return;
         try {
-            await axios.delete(`http://localhost:5001/api/contact/${id}`, checkAuth());
+            await axios.delete(`${API_URL}/api/contact/${id}`, checkAuth());
             setMessages(messages.filter(msg => msg._id !== id));
             toast.success("Message deleted successfully");
         } catch (error) {

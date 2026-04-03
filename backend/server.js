@@ -22,11 +22,12 @@ app.use(express.json());
 
 // CORS Configuration - Allow frontend origins
 const allowedOrigins = [
+  process.env.FRONTEND_URL,
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
   "http://localhost:3000",
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {

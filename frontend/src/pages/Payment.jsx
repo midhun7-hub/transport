@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
+import { API_URL } from "../config";
 
-const BACKEND_URL = "http://localhost:5001";
+const BACKEND_URL = API_URL;
 
 function Payment({ preference, vehicle, user, onLogout }) {
   const navigate = useNavigate();

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationBar from "../Components/NavigationBar";
 import Footer from "../Components/Footer";
 import axios from "axios";
+import { API_URL } from "../config";
 import { toast } from "react-hot-toast";
 
 function Booking({ preference, onSelectVehicle, user, onLogout }) {
@@ -16,7 +17,7 @@ function Booking({ preference, onSelectVehicle, user, onLogout }) {
 
   const fetchVehicles = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/vehicles");
+      const res = await axios.get(`${API_URL}/api/vehicles`);
       setVehicles(res.data.filter(v => v.availability));
     } catch (error) {
       toast.error("Failed to load vehicles");

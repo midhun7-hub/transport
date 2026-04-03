@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
@@ -18,7 +19,7 @@ const ManageVehicles = () => {
 
     const fetchVehicles = async () => {
         try {
-            const res = await axios.get('http://localhost:5001/api/vehicles', checkAuth());
+            const res = await axios.get(`${API_URL}/api/vehicles`, checkAuth());
             setVehicles(res.data);
         } catch (error) {
             toast.error("Failed to load vehicles");
@@ -44,10 +45,10 @@ const ManageVehicles = () => {
         e.preventDefault();
         try {
             if (editId) {
-                await axios.put(`http://localhost:5001/api/vehicles/${editId}`, formData, checkAuth());
+                await axios.put(`${API_URL}/api/vehicles/${editId}`, formData, checkAuth());
                 toast.success("Vehicle updated successfully");
             } else {
-                await axios.post('http://localhost:5001/api/vehicles', formData, checkAuth());
+                await axios.post(`${API_URL}/api/vehicles`, formData, checkAuth());
                 toast.success("Vehicle added successfully");
             }
             fetchVehicles();
@@ -60,7 +61,7 @@ const ManageVehicles = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this vehicle?")) {
             try {
-                await axios.delete(`http://localhost:5001/api/vehicles/${id}`, checkAuth());
+                await axios.delete(`${API_URL}/api/vehicles/${id}`, checkAuth());
                 toast.success("Vehicle deleted");
                 fetchVehicles();
             } catch (error) {
@@ -172,7 +173,7 @@ const ManageVehicles = () => {
                                             uploadData.append('image', file);
                                             const loadingToast = toast.loading("Uploading image...");
                                             try {
-                                                const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                const res = await axios.post(`${API_URL}/api/upload`, uploadData);
                                                 setFormData({ ...formData, image: res.data.imageUrl });
                                                 toast.success("Image uploaded successfully", { id: loadingToast });
                                             } catch (err) {
@@ -201,7 +202,7 @@ const ManageVehicles = () => {
                                                 uploadData.append('image', file);
                                                 const loadingToast = toast.loading("Uploading image...");
                                                 try {
-                                                    const res = await axios.post('http://localhost:5001/api/upload', uploadData);
+                                                    const res = await axios.post(`${API_URL}/api/upload`, uploadData);
                                                     setFormData({ ...formData, image: res.data.imageUrl });
                                                     toast.success("Image uploaded successfully", { id: loadingToast });
                                                 } catch (err) {
