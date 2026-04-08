@@ -59,6 +59,9 @@ function LoginSignUp({ onLogin }) {
     setLoading(true);
     setError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const mode = isSignUp ? "signup" : "login";
     const data = isSignUp
       ? {
@@ -76,14 +79,20 @@ function LoginSignUp({ onLogin }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Request failed");
 
       if (onLogin) onLogin(json);
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError("Request timed out. Please check your connection and try again.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -92,19 +101,29 @@ function LoginSignUp({ onLogin }) {
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
     setError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const res = await fetch(`${API_URL}/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: credentialResponse.credential }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Google authentication failed");
 
       if (onLogin) onLogin(json);
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError("Google authentication timed out.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
