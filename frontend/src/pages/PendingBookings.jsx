@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { X, User, MapPin, Package, CreditCard, Truck } from 'lucide-react';
 
 const PendingBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [drivers, setDrivers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedBookingForTracking, setSelectedBookingForTracking] = useState(null);
+    const [selectedBookingForSummary, setSelectedBookingForSummary] = useState(null);
     const [trackingState, setTrackingState] = useState({
         vehicleReached: false, cargoLoaded: false, inTransit: false, reachedDrop: false, cargoUnloaded: false
     });
@@ -101,7 +103,11 @@ const PendingBookings = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {bookings.map((b) => (
-                            <tr key={b._id} className="hover:bg-gray-50 transition-colors">
+                            <tr 
+                                key={b._id} 
+                                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                onClick={() => setSelectedBookingForSummary(b)}
+                            >
                                 <td className="px-6 py-4">
                                     <div className="text-sm font-semibold text-gray-900">{b.user?.name || 'Guest User'}</div>
                                     <div className="text-xs text-gray-500">{new Date(b.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</div>
@@ -144,6 +150,7 @@ const PendingBookings = () => {
                                         {!b.driver && (
                                             <select
                                                 onChange={(e) => handleAssignDriver(b._id, e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
                                                 className="block w-40 border border-gray-300 rounded-md shadow-sm py-1.5 px-2 text-xs focus:ring-blue-500 focus:border-blue-500"
                                                 defaultValue=""
                                             >
@@ -156,6 +163,7 @@ const PendingBookings = () => {
                                         <select
                                             value={b.status}
                                             onChange={(e) => handleStatusUpdate(b._id, e.target.value)}
+                                            onClick={(e) => e.stopPropagation()}
                                             className="block w-40 border border-gray-300 rounded-md shadow-sm py-1.5 px-2 text-xs focus:ring-blue-500 focus:border-blue-500"
                                         >
                                             <option value="Pending">Pending</option>
@@ -165,7 +173,7 @@ const PendingBookings = () => {
                                             <option value="Cancelled">Cancelled</option>
                                         </select>
                                         <button
-                                            onClick={() => handleOpenTrackingModal(b)}
+                                            onClick={(e) => { e.stopPropagation(); handleOpenTrackingModal(b); }}
                                             className="w-40 py-1.5 px-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors text-center mt-2 mx-auto sm:mx-0"
                                         >
                                             Update Tracking
@@ -212,6 +220,186 @@ const PendingBookings = () => {
                         <div className="flex justify-end space-x-3 mt-8">
                             <button onClick={() => setSelectedBookingForTracking(null)} className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">Cancel</button>
                             <button onClick={handleUpdateTracking} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Save</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Summary Modal */}
+            {selectedBookingForSummary && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={() => setSelectedBookingForSummary(null)}>
+                    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center z-10">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-800">Booking Summary</h2>
+                                <p className="text-xs text-gray-500 mt-1">ID: {selectedBookingForSummary._id}</p>
+                            </div>
+                            <button onClick={() => setSelectedBookingForSummary(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        {/* Body */}
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* User Info */}
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2 text-blue-600 mb-2">
+                                    <User size={18} />
+                                    <h3 className="font-semibold text-gray-800">Customer Details</h3>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm border border-gray-100">
+                                    <p><span className="text-gray-500">Name:</span> <span className="font-medium text-gray-900">{selectedBookingForSummary.user?.name || 'Guest User'}</span></p>
+                                    <p><span className="text-gray-500">Email:</span> <span className="font-medium text-gray-900">{selectedBookingForSummary.user?.email || 'N/A'}</span></p>
+                                    <p><span className="text-gray-500">Contact:</span> <span className="font-medium text-gray-900">{selectedBookingForSummary.user?.contact || 'N/A'}</span></p>
+                                </div>
+                            </div>
+
+                            {/* Route Info */}
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2 text-green-600 mb-2">
+                                    <MapPin size={18} />
+                                    <h3 className="font-semibold text-gray-800">Route & Distance</h3>
+                                </div>
+                                <div className="bg-green-50 rounded-lg p-4 space-y-3 text-sm border border-green-100">
+                                    <div>
+                                        <div className="text-xs text-gray-500 font-medium">Pickup</div>
+                                        <div className="font-medium text-gray-900 mt-0.5">{selectedBookingForSummary.from}</div>
+                                    </div>
+                                    <div className="pl-2 border-l-2 border-dashed border-green-300 py-1">
+                                         <div className="text-xs text-gray-500">{selectedBookingForSummary.distance} km total distance</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-gray-500 font-medium">Drop-off</div>
+                                        <div className="font-medium text-gray-900 mt-0.5">{selectedBookingForSummary.to}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Cargo Info */}
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2 text-amber-600 mb-2">
+                                    <Package size={18} />
+                                    <h3 className="font-semibold text-gray-800">Cargo & Schedule</h3>
+                                </div>
+                                <div className="bg-orange-50 rounded-lg p-4 space-y-2 text-sm border border-orange-100">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Vehicle Type</span>
+                                        <span className="font-medium text-gray-900">{selectedBookingForSummary.vehicleType}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Cargo Type</span>
+                                        <span className="font-medium text-gray-900">{selectedBookingForSummary.cargoType || 'General'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Weight</span>
+                                        <span className="font-medium text-gray-900">{selectedBookingForSummary.weight} kg</span>
+                                    </div>
+                                    {(selectedBookingForSummary.scheduledDate && selectedBookingForSummary.scheduledTime) && (
+                                        <div className="flex justify-between pt-2 border-t border-orange-200 mt-2">
+                                            <span className="text-gray-500">Scheduled For</span>
+                                            <span className="font-medium text-gray-900">{selectedBookingForSummary.scheduledDate} at {selectedBookingForSummary.scheduledTime}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Payment Info */}
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2 text-purple-600 mb-2">
+                                    <CreditCard size={18} />
+                                    <h3 className="font-semibold text-gray-800">Payment Details</h3>
+                                </div>
+                                <div className="bg-purple-50 rounded-lg p-4 space-y-2 text-sm border border-purple-100">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Amount</span>
+                                        <span className="font-bold text-gray-900 text-base">₹{selectedBookingForSummary.amount}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <span className="text-gray-500">Payment Status</span>
+                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                            selectedBookingForSummary.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {selectedBookingForSummary.paymentStatus || 'Pending'}
+                                        </span>
+                                    </div>
+                                     <div className="flex justify-between items-center mt-2">
+                                        <span className="text-gray-500">Booking Status</span>
+                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                            selectedBookingForSummary.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            selectedBookingForSummary.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                            selectedBookingForSummary.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                            'bg-blue-100 text-blue-800'
+                                        }`}>
+                                            {selectedBookingForSummary.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Driver & Tracking Info - Full Width */}
+                            <div className="md:col-span-2 space-y-4">
+                                <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                    <div className="flex items-center space-x-2 text-indigo-600">
+                                        <Truck size={18} />
+                                        <h3 className="font-semibold text-gray-800">Driver & Live Tracking</h3>
+                                    </div>
+                                </div>
+                                
+                                {selectedBookingForSummary.driver ? (
+                                    <div className="flex items-center space-x-4 bg-white p-3 rounded-lg border border-gray-200">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                                            {selectedBookingForSummary.driver.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900 text-sm">{selectedBookingForSummary.driver.name}</p>
+                                            <p className="text-xs text-gray-500">Contact: {selectedBookingForSummary.driver.contact}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded-lg border border-yellow-200">
+                                        No driver assigned yet. 
+                                    </div>
+                                )}
+
+                                {/* Tracking Timeline Visualizer */}
+                                <div className="pt-4 pb-2">
+                                    <div className="relative flex justify-between items-center max-w-lg mx-auto">
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 z-0"></div>
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-500 z-0 transition-all duration-500" 
+                                            style={{ 
+                                                width: selectedBookingForSummary.tracking?.cargoUnloaded ? '100%' : 
+                                                       selectedBookingForSummary.tracking?.reachedDrop ? '75%' : 
+                                                       selectedBookingForSummary.tracking?.inTransit ? '50%' : 
+                                                       selectedBookingForSummary.tracking?.cargoLoaded ? '25%' : 
+                                                       selectedBookingForSummary.tracking?.vehicleReached ? '0%' : '0%' 
+                                            }}>
+                                        </div>
+                                        
+                                        {[
+                                            { key: 'vehicleReached', label: 'Reached' },
+                                            { key: 'cargoLoaded', label: 'Loaded' },
+                                            { key: 'inTransit', label: 'In Transit' },
+                                            { key: 'reachedDrop', label: 'Reached Dest' },
+                                            { key: 'cargoUnloaded', label: 'Unloaded' }
+                                        ].map((step, idx) => {
+                                            const isDone = selectedBookingForSummary.tracking?.[step.key];
+                                            return (
+                                                <div key={step.key} className="relative z-10 flex flex-col items-center group">
+                                                    <div className={`w-5 h-5 rounded-full border-4 flex items-center justify-center transition-colors
+                                                        ${isDone ? 'border-green-500 bg-green-500' : 'border-gray-300 bg-white'}`}>
+                                                    </div>
+                                                    <span className={`text-[10px] sm:text-xs mt-2 font-medium absolute top-6 whitespace-nowrap
+                                                        ${isDone ? 'text-green-700' : 'text-gray-400'}`}>
+                                                        {step.label}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="h-4"></div> {/* Spacer for absolute labels */}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
