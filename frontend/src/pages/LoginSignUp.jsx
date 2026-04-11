@@ -60,7 +60,7 @@ function LoginSignUp({ onLogin }) {
     setError(null);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout for Render cold start
 
     const mode = isSignUp ? "signup" : "login";
     const data = isSignUp
@@ -89,7 +89,7 @@ function LoginSignUp({ onLogin }) {
       if (onLogin) onLogin(json);
     } catch (err) {
       if (err.name === 'AbortError') {
-        setError("Request timed out. Please check your connection and try again.");
+        setError("Request timed out. The server is taking a while to wake up. Please try again in 10 seconds.");
       } else {
         setError(err.message);
       }
@@ -103,7 +103,7 @@ function LoginSignUp({ onLogin }) {
     setError(null);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await fetch(`${API_URL}/google`, {
@@ -120,7 +120,7 @@ function LoginSignUp({ onLogin }) {
       if (onLogin) onLogin(json);
     } catch (err) {
       if (err.name === 'AbortError') {
-        setError("Google authentication timed out.");
+        setError("Google authentication timed out. The server might be waking up. Please try again.");
       } else {
         setError(err.message);
       }

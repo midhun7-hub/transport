@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
+import { API_URL } from "./config";
 
 import LoginSignUp from "./pages/LoginSignUp";
 import Home from "./pages/Home";
@@ -79,6 +80,9 @@ function App() {
       }
     }
     setIsLoading(false);
+
+    // Warm up the backend (Render free tier cold start)
+    fetch(API_URL).catch(() => {});
   }, []);
 
   const handleLogin = (data) => {
